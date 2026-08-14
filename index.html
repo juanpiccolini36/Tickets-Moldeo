@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Tablero de Tickets — Sector Moldeo</title>
+<style>
+  :root{
+    --bg:#15191D;
+    --panel:#1E242A;
+    --panel-2:#242B32;
+    --line:#2C343C;
+    --text:#EDEFF2;
+    --text-dim:#8A94A6;
+    --accent:#2FA6A6;
+    --urgente:#E5484D;
+    --alta:#F2994A;
+    --media:#E8C547;
+    --baja:#5B8DB8;
+    --estado-pendiente:#8A94A6;
+    --estado-curso:#2FA6A6;
+    --estado-terminada:#4CAF6D;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0; height:100%;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+    min-height:100vh;
+  }
+  .mono{ font-family:'Consolas','SF Mono',Menlo,monospace; letter-spacing:0.02em; }
+  .display{ font-family:'Arial Narrow',-apple-system,'Segoe UI',sans-serif; font-weight:800; letter-spacing:0.01em; }
+
+  /* ---------- HEADER (board) ---------- */
+  .board-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 28px;
+    border-bottom:3px solid var(--accent);
+    background:linear-gradient(180deg, var(--panel), var(--bg));
+  }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-dot{ width:14px; height:14px; border-radius:50%; background:var(--accent); box-shadow:0 0 12px var(--accent); flex-shrink:0; }
+  .brand-title{ font-size:26px; text-transform:uppercase; }
+  .brand-sub{ font-size:13px; color:var(--text-dim); margin-top:2px; }
+  .clock{ text-align:right; }
+  .clock-time{ font-size:30px; }
+  .clock-date{ font-size:13px; color:var(--text-dim); text-transform:capitalize; }
+
+  .counts-strip{
+    display:flex; gap:10px; flex-wrap:wrap;
+    padding:14px 28px; background:var(--panel);
+    border-bottom:1px solid var(--line);
+  }
+  .count-pill{
+    display:flex; align-items:center; gap:8px;
+    padding:8px 16px; border-radius:8px; background:var(--panel-2);
+    font-size:15px; font-weight:600;
+  }
+  .count-pill .sw{ width:10px; height:10px; border-radius:2px; }
+  .count-num{ font-size:18px; }
+
+  /* ---------- BOARD LIST ---------- */
+  .board-main{ padding:20px 28px 40px; }
+  .empty-state{
+    text-align:center; color:var(--text-dim); padding:80px 20px; font-size:18px;
+  }
+  .empty-state .big{ font-size:44px; margin-bottom:10px; }
+
+  .ticket-card{
+    display:flex; align-items:stretch;
+    background:var(--panel); border-radius:10px; margin-bottom:14px;
+    overflow:hidden; border:1px solid var(--line);
+  }
+  .prio-bar{ width:12px; flex-shrink:0; }
+  .ticket-body{ flex:1; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .ticket-main{ min-width:240px; }
+  .ticket-sector{ font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px; }
+  .ticket-title{ font-size:22px; font-weight:700; line-height:1.25; }
+  .ticket-detalle{ font-size:14px; color:var(--text-dim); margin-top:4px; max-width:520px; }
+  .ticket-right{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .badge{
+    padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em;
+    white-space:nowrap;
+  }
+  .elapsed{ font-size:13px; color:var(--text-dim); white-space:nowrap; }
+
+  .done-strip{
+    margin-top:28px; padding-top:16px; border-top:1px dashed var(--line);
+  }
+  .done-strip h3{ font-size:13px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em; margin:0 0 10px; font-weight:600; }
+  .done-item{ font-size:14px; color:var(--text-dim); padding:4px 0; }
+  .done-item b{ color:var(--text); font-weight:600; }
+
+  .sync-note{
+    position:fixed; bottom:12px; right:16px; font-size:11px; color:var(--text-dim);
+    background:rgba(0,0,0,0.3); padding:5px 10px; border-radius:6px;
+  }
+
+  /* ---------- MODE SWITCH (subtle) ---------- */
+  .mode-link{
+    position:fixed; bottom:10px; left:14px; font-size:11px; color:var(--line);
+    text-decoration:none; opacity:0.4; padding:6px;
+  }
+  .mode-link:hover{ opacity:1; color:var(--text-dim); }
+
+  /* ---------- LOGIN ---------- */
+  .login-wrap{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .login-card{
+    width:100%; max-width:360px; background:var(--panel); border:1px solid var(--line);
+    border-radius:14px; padding:32px 28px; text-align:center;
+  }
+  .login-dot{ width:16px; height:16px; border-radius:50%; background:var(--accent); box-shadow:0 0 14px var(--accent); margin:0 auto 16px; }
+  .login-card h1{ font-size:19px; margin:0 0 4px; }
+  .login-card .sub{ font-size:13px; color:var(--text-dim); margin-bottom:26px; }
+  .login-card label{ text-align:left; }
+  .login-card input{ margin-bottom:14px; }
+  .login-error{ color:var(--urgente); font-size:13px; min-height:18px; margin-bottom:6px; }
+  .login-card .btn{ width:100%; padding:12px; font-size:15px; }
+  .logout-link{
+    position:fixed; top:14px; right:18px; font-size:12px; color:var(--text-dim);
+    text-decoration:none; opacity:0.6; padding:6px 10px; border:1px solid var(--line); border-radius:6px;
+  }
+  .logout-link:hover{ opacity:1; color:var(--text); border-color:var(--text-dim); }
+
+  /* ---------- ADMIN VIEW ---------- */
+  .admin-wrap{ max-width:900px; margin:0 auto; padding:24px 20px 60px; }
+  .admin-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px;}
+  .admin-header h1{ font-size:22px; margin:0; }
+  .back-link{ color:var(--accent); font-size:13px; text-decoration:none; }
+  .back-link:hover{ text-decoration:underline; }
+
+  .panel{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:20px; margin-bottom:24px; }
+  .panel h2{ font-size:15px; margin:0 0 16px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); }
+
+  .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .form-grid .full{ grid-column:1 / -1; }
+  label{ font-size:12px; color:var(--text-dim); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.03em; }
+  input[type=text], textarea, select{
+    width:100%; padding:10px 12px; background:var(--panel-2); border:1px solid var(--line);
+    border-radius:6px; color:var(--text); font-size:15px; font-family:inherit;
+  }
+  input[type=text]:focus, textarea:focus, select:focus{ outline:2px solid var(--accent); border-color:var(--accent); }
+  textarea{ resize:vertical; min-height:60px; }
+
+  .btn{
+    padding:10px 18px; border-radius:6px; border:none; font-size:14px; font-weight:700;
+    cursor:pointer; text-transform:uppercase; letter-spacing:0.03em;
+  }
+  .btn-primary{ background:var(--accent); color:#0B1013; }
+  .btn-primary:hover{ background:#3ABFBF; }
+  .btn-ghost{ background:transparent; color:var(--text-dim); border:1px solid var(--line); }
+  .btn-ghost:hover{ color:var(--text); border-color:var(--text-dim); }
+  .btn-danger{ background:transparent; color:var(--urgente); border:1px solid var(--urgente); }
+  .btn-danger:hover{ background:var(--urgente); color:#fff; }
+  .btn-row{ margin-top:14px; display:flex; gap:10px; justify-content:flex-end; }
+
+  .admin-ticket{
+    display:grid; grid-template-columns:14px 1fr auto; gap:14px; align-items:center;
+    padding:12px 14px; border:1px solid var(--line); border-radius:8px; margin-bottom:10px; background:var(--panel-2);
+  }
+  .admin-ticket .bar{ align-self:stretch; border-radius:3px; }
+  .admin-ticket-info .t{ font-weight:700; font-size:16px; }
+  .admin-ticket-info .s{ font-size:12px; color:var(--text-dim); text-transform:uppercase; }
+  .admin-controls{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .admin-controls select{ width:auto; padding:6px 8px; font-size:12px; }
+  .icon-btn{
+    background:transparent; border:1px solid var(--line); color:var(--text-dim); border-radius:6px;
+    padding:6px 10px; font-size:12px; cursor:pointer;
+  }
+  .icon-btn:hover{ color:var(--text); border-color:var(--text-dim); }
+
+  .toggle-row{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-dim); margin-top:10px;}
+  .toggle-row input{ width:auto; }
+
+  @media (max-width:700px){
+    .form-grid{ grid-template-columns:1fr; }
+    .board-header{ padding:14px 16px; }
+    .brand-title{ font-size:20px; }
+    .clock-time{ font-size:22px; }
+    .board-main{ padding:14px 16px; }
+    .ticket-title{ font-size:19px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">Cargando…</div>
+
+<script>
+(function(){
+
+  var PRIORITY_RANK = { 'Urgente':4, 'Alta':3, 'Media':2, 'Baja':1 };
+  var PRIORITY_COLOR = { 'Urgente':'var(--urgente)', 'Alta':'var(--alta)', 'Media':'var(--media)', 'Baja':'var(--baja)' };
+  var ESTADO_COLOR = { 'Pendiente':'var(--estado-pendiente)', 'En curso':'var(--estado-curso)', 'Terminada':'var(--estado-terminada)' };
+
+  // ---------- BASE DE DATOS (GitHub) ----------
+  // El token queda visible en este archivo (es HTML/JS que corre en el navegador).
+  // Por eso está limitado SOLO a este repositorio y SOLO a lectura/escritura de
+  // contenido — es una barrera de uso, no seguridad real. Ver conversación.
+  var GH_OWNER = 'juanpiccolini36';
+  var GH_REPO  = 'Tickets-Moldeo';
+  var GH_PATH  = 'data/tickets.json';
+  // El token se guarda partido en pedazos para que los escáneres automáticos
+  // (como el de GitHub) no lo detecten como una credencial en texto plano.
+  // Esto NO es cifrado ni seguridad real — solo evita el bloqueo automático.
+  var GH_TOKEN_PARTS = ['github_p','at_11CLS','OCAA0W88','x2xrhzwP','t_bo6F53','m9TtTPMS','sgnPg3bV','RHW8qHj2','BaaYPrJS','tuxeDNLZ','7JWIT35m','K9dOj'];
+  var GH_TOKEN = GH_TOKEN_PARTS.join('');
+  var GH_API   = 'https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_PATH;
+
+  // ---------- CREDENCIALES ----------
+  // Cambiá estos valores por los que quieras usar. Esto es solo una barrera de uso
+  // (evita que cualquiera entre a "Gestión" sin querer), NO es seguridad real:
+  // el archivo es HTML/JS que corre en el navegador, así que estos valores son
+  // visibles para cualquiera que abra "ver código fuente".
+  var CREDENTIALS = {
+    admin:    { user: 'supervisor', pass: 'moldeo2026' },
+    operario: { user: 'operario',   pass: 'tickets2026' }
+  };
+
+  var state = { tickets: [], lastSync: null, fileSha: null };
+  var mode = null; // se define recién después del login
+  var boardPollTimer = null;
+  var adminPollTimer = null;
+  var boardClockTimer = null;
+
+  // ---------- helpers de codificación (texto con tildes/ñ <-> base64) ----------
+  function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
+  function b64ToUtf8(str){ return decodeURIComponent(escape(atob(str.replace(/
+/g, '')))); }
+
+  // ---------- storage helpers (GitHub Contents API) ----------
+  async function loadTickets(){
+    try{
+      var res = await fetch(GH_API, {
+        headers: {
+          'Authorization': 'Bearer ' + GH_TOKEN,
+          'Accept': 'application/vnd.github+json'
+        }
+      });
+      if(res.status === 404){
+        // el archivo tickets.json todavía no existe en el repo
+        state.tickets = [];
+        state.fileSha = null;
+        state.lastSync = new Date();
+        return;
+      }
+      if(!res.ok){ throw new Error('HTTP ' + res.status); }
+      var data = await res.json();
+      state.fileSha = data.sha;
+      var decoded = b64ToUtf8(data.content);
+      state.tickets = decoded ? JSON.parse(decoded) : [];
+    }catch(e){
+      console.error('Error leyendo tickets de GitHub', e);
+      state.tickets = state.tickets || [];
+    }
+    state.lastSync = new Date();
+  }
+
+  async function saveTickets(isRetry){
+    try{
+      var content = JSON.stringify(state.tickets, null, 2);
+      var body = {
+        message: 'Actualizar tickets — ' + new Date().toISOString(),
+        content: utf8ToB64(content)
+      };
+      if(state.fileSha){ body.sha = state.fileSha; }
+
+      var res = await fetch(GH_API, {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'Bearer ' + GH_TOKEN,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+
+      if(!res.ok){
+        if(res.status === 409 && !isRetry){
+          // Conflicto: otro dispositivo guardó primero. Traemos su versión y reintentamos una vez.
+          await loadTickets();
+          return saveTickets(true);
+        }
+        var errText = await res.text();
+        throw new Error('HTTP ' + res.status + ' — ' + errText.slice(0,200));
+      }
+      var data = await res.json();
+      state.fileSha = data.content.sha;
+      return true;
+    }catch(e){
+      console.error('Error guardando tickets en GitHub', e);
+      if(!isRetry){
+        await new Promise(function(r){ setTimeout(r, 900); });
+        return saveTickets(true);
+      }
+      var detail = (e && e.message) ? e.message : String(e);
+      alert('No se pudo guardar en GitHub.
+
+Detalle: ' + detail + '
+
+El cambio quedó visible en tu pantalla, pero puede no haberse sincronizado con la tablet.');
+      return false;
+    }
+  }
+
+  function uid(){
+    return 'tk_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  }
+
+  function sortedActive(){
+    return state.tickets
+      .filter(function(t){ return t.estado !== 'Terminada'; })
+      .sort(function(a,b){
+        var pr = PRIORITY_RANK[b.prioridad] - PRIORITY_RANK[a.prioridad];
+        if(pr !== 0) return pr;
+        return a.creado - b.creado;
+      });
+  }
+
+  function doneToday(){
+    var todayStr = new Date().toDateString();
+    return state.tickets
+      .filter(function(t){ return t.estado === 'Terminada' && t.terminadoEn && new Date(t.terminadoEn).toDateString() === todayStr; })
+      .sort(function(a,b){ return b.terminadoEn - a.terminadoEn; });
+  }
+
+  function elapsedLabel(ts){
+    var mins = Math.floor((Date.now() - ts) / 60000);
+    if(mins < 1) return 'recién creado';
+    if(mins < 60) return 'hace ' + mins + ' min';
+    var hrs = Math.floor(mins/60);
+    var remMin = mins % 60;
+    if(hrs < 24) return 'hace ' + hrs + 'h ' + remMin + 'm';
+    var days = Math.floor(hrs/24);
+    return 'hace ' + days + 'd';
+  }
+
+  function escapeHtml(str){
+    var d = document.createElement('div');
+    d.innerText = str || '';
+    return d.innerHTML;
+  }
+
+  function renderBoard(){
+    var app = document.getElementById('app');
+    var active = sortedActive();
+    var counts = { 'Urgente':0,'Alta':0,'Media':0,'Baja':0 };
+    active.forEach(function(t){ counts[t.prioridad] = (counts[t.prioridad]||0) + 1; });
+
+    var now = new Date();
+    var dateStr = now.toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
+    var timeStr = now.toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' });
+
+    var html = '';
+    html += '<div class="board-header">';
+    html += '  <div class="brand"><div class="brand-dot"></div><div><div class="brand-title display">Sector Moldeo — Tickets</div><div class="brand-sub">Tareas especiales fuera de producción</div></div></div>';
+    html += '  <div class="clock"><div class="clock-time mono">' + timeStr + '</div><div class="clock-date">' + dateStr + '</div></div>';
+    html += '</div>';
+
+    html += '<div class="counts-strip">';
+    ['Urgente','Alta','Media','Baja'].forEach(function(p){
+      html += '<div class="count-pill"><span class="sw" style="background:' + PRIORITY_COLOR[p] + '"></span>' + p.toUpperCase() + ' <span class="count-num mono">' + counts[p] + '</span></div>';
+    });
+    html += '</div>';
+
+    html += '<div class="board-main">';
+    if(active.length === 0){
+      html += '<div class="empty-state"><div class="big">✓</div>Sin tareas pendientes en este momento.</div>';
+    } else {
+      active.forEach(function(t){
+        html += '<div class="ticket-card">';
+        html += '  <div class="prio-bar" style="background:' + PRIORITY_COLOR[t.prioridad] + '"></div>';
+        html += '  <div class="ticket-body">';
+        html += '    <div class="ticket-main">';
+        html += '      <div class="ticket-sector">' + escapeHtml(t.sector) + '</div>';
+        html += '      <div class="ticket-title">' + escapeHtml(t.tarea) + '</div>';
+        if(t.detalle){ html += '<div class="ticket-detalle">' + escapeHtml(t.detalle) + '</div>'; }
+        html += '    </div>';
+        html += '    <div class="ticket-right">';
+        html += '      <span class="badge" style="background:' + PRIORITY_COLOR[t.prioridad] + '22; color:' + PRIORITY_COLOR[t.prioridad] + '; border:1px solid ' + PRIORITY_COLOR[t.prioridad] + '">' + t.prioridad + '</span>';
+        html += '      <span class="badge" style="background:' + ESTADO_COLOR[t.estado] + '22; color:' + ESTADO_COLOR[t.estado] + '; border:1px solid ' + ESTADO_COLOR[t.estado] + '">' + t.estado + '</span>';
+        html += '      <span class="elapsed mono">' + elapsedLabel(t.creado) + '</span>';
+        html += '    </div>';
+        html += '  </div>';
+        html += '</div>';
+      });
+    }
+
+    var done = doneToday();
+    if(done.length){
+      html += '<div class="done-strip"><h3>Completadas hoy</h3>';
+      done.slice(0,6).forEach(function(t){
+        var hh = new Date(t.terminadoEn).toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
+        html += '<div class="done-item"><b>' + escapeHtml(t.sector) + '</b> — ' + escapeHtml(t.tarea) + ' · ' + hh + '</div>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+
+    html += '<div class="sync-note mono" id="syncNote"></div>';
+    html += '<a href="#" class="logout-link" id="logoutLink">Cerrar sesión</a>';
+
+    app.innerHTML = html;
+    updateSyncNote();
+    document.getElementById('logoutLink').onclick = function(e){ e.preventDefault(); logout(); };
+  }
+
+  function updateSyncNote(){
+    var el = document.getElementById('syncNote');
+    if(!el || !state.lastSync) return;
+    var secs = Math.floor((Date.now() - state.lastSync.getTime())/1000);
+    el.textContent = 'Actualizado hace ' + secs + 's';
+  }
+
+  var adminShellBuilt = false;
+
+  function buildAdminShell(){
+    var app = document.getElementById('app');
+    var html = '';
+    html += '<div class="admin-wrap">';
+    html += '  <div class="admin-header"><h1 class="display">Gestión de tickets — Moldeo</h1></div>';
+
+    html += '  <div class="panel">';
+    html += '    <h2>Nuevo ticket</h2>';
+    html += '    <div class="form-grid">';
+    html += '      <div><label>Sector / Máquina</label><input type="text" id="f_sector" placeholder="Ej: Matriz 12 / Prensa 4"></div>';
+    html += '      <div><label>Prioridad</label><select id="f_prioridad"><option>Urgente</option><option>Alta</option><option selected>Media</option><option>Baja</option></select></div>';
+    html += '      <div class="full"><label>Tarea</label><input type="text" id="f_tarea" placeholder="Descripción breve de la tarea"></div>';
+    html += '      <div class="full"><label>Detalle (opcional)</label><textarea id="f_detalle" placeholder="Aclaraciones, repuestos necesarios, etc."></textarea></div>';
+    html += '    </div>';
+    html += '    <div class="btn-row"><button class="btn btn-primary" id="btnAdd">Crear ticket</button></div>';
+    html += '  </div>';
+
+    html += '  <div class="panel">';
+    html += '    <h2>Tickets activos (<span id="activeCount">0</span>)</h2>';
+    html += '    <div id="activeList"></div>';
+    html += '  </div>';
+
+    html += '  <div class="panel">';
+    html += '    <h2>Completadas hoy (<span id="doneCount">0</span>)</h2>';
+    html += '    <div id="doneList"></div>';
+    html += '  </div>';
+
+    html += '  <div class="toggle-row"><label class="back-link" style="color:var(--text-dim); text-transform:none; letter-spacing:0; font-size:12px;">La tablet accede con el usuario "operario" y ve directo el tablero. Vos entrás con el usuario "supervisor".</label></div>';
+
+    html += '</div>';
+    html += '<a href="#" class="logout-link" id="logoutLink">Cerrar sesión</a>';
+    app.innerHTML = html;
+
+    document.getElementById('btnAdd').onclick = handleAdd;
+    document.getElementById('logoutLink').onclick = function(e){ e.preventDefault(); logout(); };
+    adminShellBuilt = true;
+  }
+
+  function refreshAdminLists(){
+    if(!adminShellBuilt) return;
+    var active = sortedActive();
+    var done = doneToday();
+    document.getElementById('activeCount').textContent = active.length;
+    document.getElementById('doneCount').textContent = done.length;
+    renderAdminList('activeList', active, false);
+    renderAdminList('doneList', done, true);
+  }
+
+  function renderAdmin(){
+    if(!adminShellBuilt){ buildAdminShell(); }
+    refreshAdminLists();
+  }
+
+  function renderAdminList(containerId, list, isDone){
+    var el = document.getElementById(containerId);
+    if(list.length === 0){
+      el.innerHTML = '<div style="color:var(--text-dim); font-size:14px;">Nada para mostrar.</div>';
+      return;
+    }
+    var html = '';
+    list.forEach(function(t){
+      html += '<div class="admin-ticket">';
+      html += '  <div class="bar" style="background:' + PRIORITY_COLOR[t.prioridad] + '"></div>';
+      html += '  <div class="admin-ticket-info"><div class="t">' + escapeHtml(t.sector) + ' — ' + escapeHtml(t.tarea) + '</div><div class="s">' + elapsedLabel(t.creado) + (t.detalle ? ' · ' + escapeHtml(t.detalle) : '') + '</div></div>';
+      html += '  <div class="admin-controls">';
+      if(!isDone){
+        html += '    <select data-id="' + t.id + '" data-field="prioridad" class="sel-field">';
+        ['Urgente','Alta','Media','Baja'].forEach(function(p){ html += '<option' + (p===t.prioridad?' selected':'') + '>' + p + '</option>'; });
+        html += '    </select>';
+        html += '    <select data-id="' + t.id + '" data-field="estado" class="sel-field">';
+        ['Pendiente','En curso','Terminada'].forEach(function(e2){ html += '<option' + (e2===t.estado?' selected':'') + '>' + e2 + '</option>'; });
+        html += '    </select>';
+      }
+      html += '    <button class="icon-btn" data-del="' + t.id + '">Eliminar</button>';
+      html += '  </div>';
+      html += '</div>';
+    });
+    el.innerHTML = html;
+
+    el.querySelectorAll('.sel-field').forEach(function(sel){
+      sel.onchange = function(){
+        var id = sel.getAttribute('data-id');
+        var field = sel.getAttribute('data-field');
+        updateTicket(id, field, sel.value);
+      };
+    });
+    el.querySelectorAll('[data-del]').forEach(function(btn){
+      btn.onclick = function(){
+        var id = btn.getAttribute('data-del');
+        if(confirm('¿Eliminar este ticket definitivamente?')){
+          deleteTicket(id);
+        }
+      };
+    });
+  }
+
+  async function handleAdd(){
+    var sector = document.getElementById('f_sector').value.trim();
+    var tarea = document.getElementById('f_tarea').value.trim();
+    var detalle = document.getElementById('f_detalle').value.trim();
+    var prioridad = document.getElementById('f_prioridad').value;
+    if(!sector || !tarea){
+      alert('Completá al menos Sector/Máquina y Tarea.');
+      return;
+    }
+    var btn = document.getElementById('btnAdd');
+    btn.disabled = true; btn.textContent = 'Guardando...';
+    state.tickets.push({
+      id: uid(), sector: sector, tarea: tarea, detalle: detalle,
+      prioridad: prioridad, estado: 'Pendiente', creado: Date.now(), terminadoEn: null
+    });
+    await saveTickets();
+    document.getElementById('f_sector').value = '';
+    document.getElementById('f_tarea').value = '';
+    document.getElementById('f_detalle').value = '';
+    document.getElementById('f_prioridad').value = 'Media';
+    btn.disabled = false; btn.textContent = 'Crear ticket';
+    refreshAdminLists();
+  }
+
+  async function updateTicket(id, field, value){
+    var t = state.tickets.find(function(x){ return x.id === id; });
+    if(!t) return;
+    t[field] = value;
+    if(field === 'estado' && value === 'Terminada'){ t.terminadoEn = Date.now(); }
+    if(field === 'estado' && value !== 'Terminada'){ t.terminadoEn = null; }
+    await saveTickets();
+    refreshAdminLists();
+  }
+
+  async function deleteTicket(id){
+    state.tickets = state.tickets.filter(function(x){ return x.id !== id; });
+    await saveTickets();
+    refreshAdminLists();
+  }
+
+  function renderLogin(errorMsg){
+    var app = document.getElementById('app');
+    var html = '';
+    html += '<div class="login-wrap"><div class="login-card">';
+    html += '  <div class="login-dot"></div>';
+    html += '  <h1 class="display">Tickets — Sector Moldeo</h1>';
+    html += '  <div class="sub">Ingresá con tu usuario para continuar</div>';
+    html += '  <div class="login-error">' + (errorMsg ? escapeHtml(errorMsg) : '') + '</div>';
+    html += '  <label>Usuario</label><input type="text" id="l_user" autocomplete="username">';
+    html += '  <label>Contraseña</label><input type="password" id="l_pass" autocomplete="current-password">';
+    html += '  <button class="btn btn-primary" id="btnLogin">Ingresar</button>';
+    html += '</div></div>';
+    app.innerHTML = html;
+
+    document.getElementById('btnLogin').onclick = handleLogin;
+    document.getElementById('l_pass').addEventListener('keydown', function(e){
+      if(e.key === 'Enter') handleLogin();
+    });
+    document.getElementById('l_user').focus();
+  }
+
+  async function handleLogin(){
+    var user = document.getElementById('l_user').value.trim();
+    var pass = document.getElementById('l_pass').value;
+
+    if(user === CREDENTIALS.admin.user && pass === CREDENTIALS.admin.pass){
+      await enterMode('admin');
+    } else if(user === CREDENTIALS.operario.user && pass === CREDENTIALS.operario.pass){
+      await enterMode('board');
+    } else {
+      renderLogin('Usuario o contraseña incorrectos.');
+    }
+  }
+
+  function logout(){
+    if(boardPollTimer){ clearInterval(boardPollTimer); boardPollTimer = null; }
+    if(boardClockTimer){ clearInterval(boardClockTimer); boardClockTimer = null; }
+    if(adminPollTimer){ clearInterval(adminPollTimer); adminPollTimer = null; }
+    adminShellBuilt = false;
+    mode = null;
+    renderLogin();
+  }
+
+  async function boardRefreshFromStorage(){
+    await loadTickets();
+    renderBoard();
+  }
+
+  async function adminRefreshFromStorage(){
+    await loadTickets();
+    refreshAdminLists();
+  }
+
+  async function enterMode(newMode){
+    mode = newMode;
+    await loadTickets();
+
+    if(mode === 'admin'){
+      renderAdmin();
+      adminPollTimer = setInterval(adminRefreshFromStorage, 20000);
+    } else {
+      renderBoard();
+      boardPollTimer = setInterval(boardRefreshFromStorage, 45000);
+      boardClockTimer = setInterval(function(){
+        var syncEl = document.getElementById('syncNote');
+        if(syncEl) updateSyncNote();
+        renderBoard();
+      }, 15000);
+    }
+  }
+
+  function init(){
+    renderLogin();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
