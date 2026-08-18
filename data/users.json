@@ -1,0 +1,18 @@
+[
+  {
+    "id": "u_admin1",
+    "nombre": "Supervisor",
+    "usuario": "supervisor",
+    "clave": "moldeo2026",
+    "rol": "admin",
+    "activo": true
+  },
+  {
+    "id": "u_op1",
+    "nombre": "Operario",
+    "usuario": "operario",
+    "clave": "tickets2026",
+    "rol": "operario",
+    "activo": true
+  }
+]
