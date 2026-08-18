@@ -31,13 +31,13 @@
     "tarea": "Prueba de pausa",
     "detalle": "ticket de prueba temporal",
     "prioridad": "Media",
-    "estado": "Pendiente",
+    "estado": "En curso",
     "creado": 1787078857042,
-    "iniciadoEn": null,
+    "iniciadoEn": 1787078889260,
     "terminadoEn": null,
     "pausadoEn": null,
     "creadoPor": "Test",
-    "iniciadoPor": null,
+    "iniciadoPor": "Diego Pintos",
     "terminadoPor": null
   }
 ]
