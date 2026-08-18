@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "id": "tk_msythu3sn6oe5",
+    "sector": "M-242",
+    "tarea": "Retirar matriz de Panel 600x600mm y guardarlo en el palet nº60.",
+    "detalle": "Antes de guardar todo reparar la matriz de repuesto con su extractor por rotura durante el moldeo de una pieza.",
+    "prioridad": "Baja",
+    "estado": "Pendiente",
+    "creado": 1787066906536,
+    "terminadoEn": null,
+    "creadoPor": "Supervisor",
+    "iniciadoPor": null,
+    "terminadoPor": null
+  }
+]
