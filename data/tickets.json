@@ -24,5 +24,20 @@
     "creadoPor": "Supervisor",
     "iniciadoPor": "Diego Pintos",
     "terminadoPor": "Diego Pintos"
+  },
+  {
+    "id": "tk_pausetest",
+    "sector": "Matriz 9",
+    "tarea": "Prueba de pausa",
+    "detalle": "ticket de prueba temporal",
+    "prioridad": "Media",
+    "estado": "Pendiente",
+    "creado": 1787078857042,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Test",
+    "iniciadoPor": null,
+    "terminadoPor": null
   }
 ]
