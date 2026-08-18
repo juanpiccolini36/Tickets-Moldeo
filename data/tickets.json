@@ -24,5 +24,22 @@
     "creadoPor": "Supervisor",
     "iniciadoPor": "Diego Pintos",
     "terminadoPor": "Diego Pintos"
+  },
+  {
+    "id": "tk_msz0wxar1504f",
+    "sector": "Matriz 5",
+    "tarea": "Prueba asignacion",
+    "detalle": "",
+    "prioridad": "Media",
+    "estado": "Pendiente",
+    "creado": 1787079367827,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
