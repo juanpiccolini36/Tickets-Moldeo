@@ -20,6 +20,7 @@
     --estado-pendiente:#8A94A6;
     --estado-curso:#2FA6A6;
     --estado-terminada:#4CAF6D;
+    --estado-pausada:#D9A441;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0; padding:0; height:100%;}
@@ -226,6 +227,13 @@
   .board-table .mini-attrib{ font-size:12px; color:var(--text-dim); margin-top:3px; }
   .board-table-compact td{ padding:10px 16px; font-size:14px; }
   .board-table-compact .tarea-cell{ font-weight:600; }
+  .activado-cell{ white-space:nowrap; }
+  .activado-fecha{ font-size:14px; }
+  .activado-dias{ font-size:12px; color:var(--text-dim); margin-top:2px; }
+  .board-btn-pause{ background:var(--estado-pausada); color:#0B1013; }
+  .board-btn-pause:active{ background:#E8B65C; }
+  .board-btn-resume{ background:var(--accent); color:#0B1013; }
+  .board-btn-resume:active{ background:#3ABFBF; }
 </style>
 </head>
 <body>
@@ -237,7 +245,7 @@
 
   var PRIORITY_RANK = { 'Urgente':4, 'Alta':3, 'Media':2, 'Baja':1 };
   var PRIORITY_COLOR = { 'Urgente':'var(--urgente)', 'Alta':'var(--alta)', 'Media':'var(--media)', 'Baja':'var(--baja)' };
-  var ESTADO_COLOR = { 'Pendiente':'var(--estado-pendiente)', 'En curso':'var(--estado-curso)', 'Terminada':'var(--estado-terminada)' };
+  var ESTADO_COLOR = { 'Pendiente':'var(--estado-pendiente)', 'En curso':'var(--estado-curso)', 'Pausada':'var(--estado-pausada)', 'Terminada':'var(--estado-terminada)' };
 
   // ---------- BASE DE DATOS (GitHub) ----------
   // El token queda visible en este archivo (es HTML/JS que corre en el navegador).
@@ -406,6 +414,17 @@
       .sort(function(a,b){ return b.terminadoEn - a.terminadoEn; });
   }
 
+  function formatDateTime(ts){
+    var d = new Date(ts);
+    var datePart = d.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit' });
+    var timePart = d.toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' });
+    return datePart + ' ' + timePart;
+  }
+
+  function daysActive(t){
+    return Math.floor((Date.now() - t.creado) / 86400000);
+  }
+
   function elapsedLabel(ts){
     var mins = Math.floor((Date.now() - ts) / 60000);
     if(mins < 1) return 'recién creado';
@@ -450,9 +469,10 @@
       html += '<div class="empty-state"><div class="big">\u2713</div>Sin tareas pendientes en este momento.</div>';
     } else {
       html += '<div class="board-table-wrap"><table class="board-table"><thead><tr>';
-      html += '<th class="col-bar"></th><th>Prioridad</th><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Detalle</th><th>Estado</th><th>Tiempo</th><th>Acciones</th>';
+      html += '<th class="col-bar"></th><th>Prioridad</th><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Detalle</th><th>Estado</th><th>Activado</th><th>Acciones</th>';
       html += '</tr></thead><tbody>';
       active.forEach(function(t){
+        var dias = daysActive(t);
         html += '<tr>';
         html += '<td class="col-bar" style="background:' + PRIORITY_COLOR[t.prioridad] + '"></td>';
         html += '<td><span class="badge" style="background:' + PRIORITY_COLOR[t.prioridad] + '22; color:' + PRIORITY_COLOR[t.prioridad] + '; border:1px solid ' + PRIORITY_COLOR[t.prioridad] + '">' + t.prioridad + '</span></td>';
@@ -460,9 +480,11 @@
         html += '<td class="tarea-cell">' + escapeHtml(t.tarea) + '</td>';
         html += '<td class="detalle-cell">' + (t.detalle ? escapeHtml(t.detalle) : '\u2014') + '</td>';
         html += '<td><span class="badge" style="background:' + ESTADO_COLOR[t.estado] + '22; color:' + ESTADO_COLOR[t.estado] + '; border:1px solid ' + ESTADO_COLOR[t.estado] + '">' + t.estado + '</span>' + ((t.estado === 'En curso' && t.iniciadoPor) ? '<div class="mini-attrib">' + escapeHtml(t.iniciadoPor) + '</div>' : '') + '</td>';
-        html += '<td class="mono tiempo-cell">' + elapsedLabel(t.creado) + (isEscalated(t) ? " \u23eb" : '') + '</td>';
+        html += '<td class="activado-cell"><div class="activado-fecha mono">' + formatDateTime(t.creado) + '</div><div class="activado-dias">' + dias + (dias === 1 ? ' d\u00eda activo' : ' d\u00edas activo' + (dias===1?'':'s')) + (isEscalated(t) ? " \u23eb" : '') + '</div></td>';
         html += '<td class="actions-cell">';
         if(t.estado === 'Pendiente'){ html += '<button class="board-btn board-btn-start" data-action="iniciar" data-id="' + t.id + '">Comenzar</button>'; }
+        if(t.estado === 'En curso'){ html += '<button class="board-btn board-btn-pause" data-action="pausar" data-id="' + t.id + '">Pausar</button>'; }
+        if(t.estado === 'Pausada'){ html += '<button class="board-btn board-btn-resume" data-action="reanudar" data-id="' + t.id + '">Reanudar</button>'; }
         html += '<button class="board-btn board-btn-done" data-action="terminar" data-id="' + t.id + '">Terminar</button>';
         html += '</td>';
         html += '</tr>';
@@ -473,10 +495,9 @@
     var done = doneToday();
     if(done.length){
       html += '<div class="done-strip"><h3>Completadas hoy</h3>';
-      html += '<div class="board-table-wrap"><table class="board-table board-table-compact"><tbody>';
+      html += '<div class="board-table-wrap"><table class="board-table board-table-compact"><thead><tr><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Finalizado</th><th>Por</th></tr></thead><tbody>';
       done.slice(0,6).forEach(function(t){
-        var hh = new Date(t.terminadoEn).toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
-        html += '<tr><td class="sector-cell">' + escapeHtml(t.sector) + '</td><td class="tarea-cell">' + escapeHtml(t.tarea) + '</td><td class="mono">' + hh + '</td><td class="detalle-cell">' + (t.terminadoPor ? escapeHtml(t.terminadoPor) : '') + '</td></tr>';
+        html += '<tr><td class="sector-cell">' + escapeHtml(t.sector) + '</td><td class="tarea-cell">' + escapeHtml(t.tarea) + '</td><td class="mono">' + formatDateTime(t.terminadoEn) + '</td><td class="detalle-cell">' + (t.terminadoPor ? escapeHtml(t.terminadoPor) : '') + '</td></tr>';
       });
       html += '</tbody></table></div></div>';
     }
@@ -493,6 +514,8 @@
         var id = btn.getAttribute('data-id');
         var action = btn.getAttribute('data-action');
         if(action === 'iniciar'){ updateTicket(id, 'estado', 'En curso'); }
+        else if(action === 'pausar'){ updateTicket(id, 'estado', 'Pausada'); }
+        else if(action === 'reanudar'){ updateTicket(id, 'estado', 'En curso'); }
         else if(action === 'terminar'){ if(confirm('\u00bfMarcar esta tarea como Terminada?')){ updateTicket(id, 'estado', 'Terminada'); } }
       };
     });
@@ -617,6 +640,7 @@ html += '</div>'; // cierre section-usuarios
       html += '  <div class="bar" style="background:' + PRIORITY_COLOR[t.prioridad] + '"></div>';
       var attrib = '';
       if(t.estado === 'En curso' && t.iniciadoPor){ attrib = ' \u00b7 iniciado por ' + escapeHtml(t.iniciadoPor); }
+      if(t.estado === 'Pausada'){ attrib = ' \u00b7 pausada' + (t.iniciadoPor ? ' (iniciada por ' + escapeHtml(t.iniciadoPor) + ')' : ''); }
       if(t.estado === 'Terminada' && t.terminadoPor){ attrib = ' \u00b7 terminado por ' + escapeHtml(t.terminadoPor); }
       html += '  <div class="admin-ticket-info"><div class="t">' + escapeHtml(t.sector) + ' \u2014 ' + escapeHtml(t.tarea) + '</div><div class="s">' + elapsedLabel(t.creado) + (isEscalated(t) ? " \u23eb" : '') + (t.detalle ? ' \u00b7 ' + escapeHtml(t.detalle) : '') + attrib + '</div></div>';
       html += '  <div class="admin-controls">';
@@ -625,7 +649,7 @@ html += '</div>'; // cierre section-usuarios
         ['Urgente','Alta','Media','Baja'].forEach(function(p){ html += '<option' + (p===t.prioridad?' selected':'') + '>' + p + '</option>'; });
         html += '    </select>';
         html += '    <select data-id="' + t.id + '" data-field="estado" class="sel-field">';
-        ['Pendiente','En curso','Terminada'].forEach(function(e2){ html += '<option' + (e2===t.estado?' selected':'') + '>' + e2 + '</option>'; });
+        ['Pendiente','En curso','Pausada','Terminada'].forEach(function(e2){ html += '<option' + (e2===t.estado?' selected':'') + '>' + e2 + '</option>'; });
         html += '    </select>';
       }
       html += '    <button class="icon-btn" data-edit="' + t.id + '">Editar</button>';
@@ -795,7 +819,7 @@ html += '</div>'; // cierre section-usuarios
     btn.disabled = true; btn.textContent = 'Guardando...';
     state.tickets.push({
       id: uid(), sector: sector, tarea: tarea, detalle: detalle,
-      prioridad: prioridad, estado: 'Pendiente', creado: Date.now(), terminadoEn: null,
+      prioridad: prioridad, estado: 'Pendiente', creado: Date.now(), iniciadoEn: null, terminadoEn: null, pausadoEn: null,
       creadoPor: (state.currentUser ? state.currentUser.nombre : ''), iniciadoPor: null, terminadoPor: null
     });
     await saveTickets();
@@ -812,7 +836,11 @@ html += '</div>'; // cierre section-usuarios
     if(!t) return;
     t[field] = value;
     if(field === 'estado' && value === 'Terminada'){ t.terminadoEn = Date.now(); t.terminadoPor = state.currentUser ? state.currentUser.nombre : ''; }
-    if(field === 'estado' && value === 'En curso'){ t.iniciadoPor = state.currentUser ? state.currentUser.nombre : ''; }
+    if(field === 'estado' && value === 'En curso'){
+      if(!t.iniciadoEn){ t.iniciadoEn = Date.now(); }
+      t.iniciadoPor = state.currentUser ? state.currentUser.nombre : '';
+    }
+    if(field === 'estado' && value === 'Pausada'){ t.pausadoEn = Date.now(); }
     if(field === 'estado' && value === 'Pendiente'){ t.terminadoEn = null; }
     await saveTickets();
     if(mode === 'admin'){ refreshAdminLists(); } else { renderBoard(); }
