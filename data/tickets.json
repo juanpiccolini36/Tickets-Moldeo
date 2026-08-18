@@ -8,5 +8,15 @@
     "estado": "Terminada",
     "creado": 1787056319932,
     "terminadoEn": 1787056370359
+  },
+  {
+    "id": "tk_test1",
+    "sector": "Matriz 7",
+    "tarea": "Prueba boton comenzar/terminar",
+    "detalle": "",
+    "prioridad": "Media",
+    "estado": "Pendiente",
+    "creado": 1787057513990,
+    "terminadoEn": null
   }
 ]
