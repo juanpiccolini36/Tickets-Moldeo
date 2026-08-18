@@ -8,18 +8,5 @@
     "estado": "Terminada",
     "creado": 1787056319932,
     "terminadoEn": 1787056370359
-  },
-  {
-    "id": "tk_test2",
-    "sector": "Matriz 3",
-    "tarea": "Prueba de trazabilidad",
-    "detalle": "",
-    "prioridad": "Alta",
-    "estado": "Terminada",
-    "creado": 1787055317323,
-    "terminadoEn": 1787058917323,
-    "creadoPor": "Supervisor",
-    "iniciadoPor": "Pedro Test",
-    "terminadoPor": "Pedro Test"
   }
 ]
