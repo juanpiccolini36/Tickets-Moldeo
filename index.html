@@ -217,18 +217,10 @@
   var GH_TOKEN_PARTS = ['github_p','at_11CLS','OCAA0W88','x2xrhzwP','t_bo6F53','m9TtTPMS','sgnPg3bV','RHW8qHj2','BaaYPrJS','tuxeDNLZ','7JWIT35m','K9dOj'];
   var GH_TOKEN = GH_TOKEN_PARTS.join('');
   var GH_API   = 'https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_PATH;
+  var GH_USERS_PATH = 'data/users.json';
+  var GH_USERS_API  = 'https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_USERS_PATH;
 
-  // ---------- CREDENCIALES ----------
-  // Cambiá estos valores por los que quieras usar. Esto es solo una barrera de uso
-  // (evita que cualquiera entre a "Gestión" sin querer), NO es seguridad real:
-  // el archivo es HTML/JS que corre en el navegador, así que estos valores son
-  // visibles para cualquiera que abra "ver código fuente".
-  var CREDENTIALS = {
-    admin:    { user: 'supervisor', pass: 'moldeo2026' },
-    operario: { user: 'operario',   pass: 'tickets2026' }
-  };
-
-  var state = { tickets: [], lastSync: null, fileSha: null };
+  var state = { tickets: [], lastSync: null, fileSha: null, users: [], usersSha: null, currentUser: null };
   var mode = null; // se define recién después del login
   var boardPollTimer = null;
   var adminPollTimer = null;
@@ -305,6 +297,44 @@
       }
       var detail = (e && e.message) ? e.message : String(e);
       var NL = String.fromCharCode(10); alert('No se pudo guardar en GitHub.' + NL + NL + 'Detalle: ' + detail + NL + NL + 'El cambio quedó visible en tu pantalla, pero puede no haberse sincronizado con la tablet.');
+      return false;
+    }
+  }
+
+  async function loadUsers(){
+    try{
+      var res = await fetch(GH_USERS_API, {
+        headers: { 'Authorization': 'Bearer ' + GH_TOKEN, 'Accept': 'application/vnd.github+json' }
+      });
+      if(res.status === 404){ state.users = []; state.usersSha = null; return; }
+      if(!res.ok){ throw new Error('HTTP ' + res.status); }
+      var data = await res.json();
+      state.usersSha = data.sha;
+      var decoded = b64ToUtf8(data.content);
+      state.users = decoded ? JSON.parse(decoded) : [];
+    }catch(e){
+      console.error('Error leyendo usuarios de GitHub', e);
+      state.users = state.users || [];
+    }
+  }
+
+  async function saveUsers(){
+    try{
+      var content = JSON.stringify(state.users, null, 2);
+      var body = { message: 'Actualizar usuarios \u2014 ' + new Date().toISOString(), content: utf8ToB64(content) };
+      if(state.usersSha){ body.sha = state.usersSha; }
+      var res = await fetch(GH_USERS_API, {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + GH_TOKEN, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if(!res.ok){ var errText = await res.text(); throw new Error('HTTP ' + res.status + ' \u2014 ' + errText.slice(0,200)); }
+      var data = await res.json();
+      state.usersSha = data.content.sha;
+      return true;
+    }catch(e){
+      console.error('Error guardando usuarios en GitHub', e);
+      alert('No se pudo guardar el usuario. Prob\u00e1 de nuevo.');
       return false;
     }
   }
@@ -410,7 +440,7 @@
       html += '<div class="done-strip"><h3>Completadas hoy</h3>';
       done.slice(0,6).forEach(function(t){
         var hh = new Date(t.terminadoEn).toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
-        html += '<div class="done-item"><b>' + escapeHtml(t.sector) + '</b> — ' + escapeHtml(t.tarea) + ' · ' + hh + '</div>';
+        html += '<div class="done-item"><b>' + escapeHtml(t.sector) + '</b> \u2014 ' + escapeHtml(t.tarea) + ' \u00b7 ' + hh + (t.terminadoPor ? ' \u00b7 ' + escapeHtml(t.terminadoPor) : '') + '</div>';
       });
       html += '</div>';
     }
@@ -468,13 +498,30 @@
     html += '    <div id="doneList"></div>';
     html += '  </div>';
 
-    html += '  <div class="toggle-row"><label class="back-link" style="color:var(--text-dim); text-transform:none; letter-spacing:0; font-size:12px;">La tablet accede con el usuario "operario" y ve directo el tablero. Vos entrás con el usuario "supervisor".</label></div>';
+        html += '  <div class="panel">';
+    html += '    <h2>Usuarios</h2>';
+    html += '    <div class="form-grid">';
+    html += '      <div><label>Nombre</label><input type="text" id="u_nombre" placeholder="Ej: Pedro G\u00f3mez"></div>';
+    html += '      <div><label>Rol</label><select id="u_rol"><option value="operario">Operario</option><option value="admin">Supervisor</option></select></div>';
+    html += '      <div><label>Usuario</label><input type="text" id="u_usuario" placeholder="usuario de acceso"></div>';
+    html += '      <div><label>Clave</label><input type="text" id="u_clave" placeholder="c\u00f3digo corto asignado por vos, no una contrase\u00f1a personal"></div>';
+    html += '    </div>';
+    html += '    <div class="btn-row"><button class="btn btn-primary" id="btnAddUser">Crear usuario</button></div>';
+    html += '  </div>';
+
+    html += '  <div class="panel">';
+    html += '    <h2>Usuarios (<span id="userCount">0</span>)</h2>';
+    html += '    <div id="userList"></div>';
+    html += '  </div>';
+
+html += '  <div class="toggle-row"><label class="back-link" style="color:var(--text-dim); text-transform:none; letter-spacing:0; font-size:12px;">Cada persona entra con su propio usuario. Los que tengan rol \u00abOperario\u00bb ven directo el tablero; los \u00abSupervisor\u00bb entran a esta pantalla de gesti\u00f3n.</label></div>';
 
     html += '</div>';
     html += '<a href="#" class="logout-link" id="logoutLink">Cerrar sesión</a>';
     app.innerHTML = html;
 
     document.getElementById('btnAdd').onclick = handleAdd;
+    document.getElementById('btnAddUser').onclick = handleAddUser;
     document.getElementById('logoutLink').onclick = function(e){ e.preventDefault(); logout(); };
     adminShellBuilt = true;
   }
@@ -492,6 +539,7 @@
   function renderAdmin(){
     if(!adminShellBuilt){ buildAdminShell(); }
     refreshAdminLists();
+    refreshUserList();
   }
 
   function renderAdminList(containerId, list, isDone){
@@ -504,7 +552,10 @@
     list.forEach(function(t){
       html += '<div class="admin-ticket">';
       html += '  <div class="bar" style="background:' + PRIORITY_COLOR[t.prioridad] + '"></div>';
-      html += '  <div class="admin-ticket-info"><div class="t">' + escapeHtml(t.sector) + ' — ' + escapeHtml(t.tarea) + '</div><div class="s">' + elapsedLabel(t.creado) + (isEscalated(t) ? " \u23eb" : '') + (t.detalle ? ' · ' + escapeHtml(t.detalle) : '') + '</div></div>';
+      var attrib = '';
+      if(t.estado === 'En curso' && t.iniciadoPor){ attrib = ' \u00b7 iniciado por ' + escapeHtml(t.iniciadoPor); }
+      if(t.estado === 'Terminada' && t.terminadoPor){ attrib = ' \u00b7 terminado por ' + escapeHtml(t.terminadoPor); }
+      html += '  <div class="admin-ticket-info"><div class="t">' + escapeHtml(t.sector) + ' \u2014 ' + escapeHtml(t.tarea) + '</div><div class="s">' + elapsedLabel(t.creado) + (isEscalated(t) ? " \u23eb" : '') + (t.detalle ? ' \u00b7 ' + escapeHtml(t.detalle) : '') + attrib + '</div></div>';
       html += '  <div class="admin-controls">';
       if(!isDone){
         html += '    <select data-id="' + t.id + '" data-field="prioridad" class="sel-field">';
@@ -537,6 +588,72 @@
     });
   }
 
+  async function handleAddUser(){
+    var nombre = document.getElementById('u_nombre').value.trim();
+    var rol = document.getElementById('u_rol').value;
+    var usuario = document.getElementById('u_usuario').value.trim();
+    var clave = document.getElementById('u_clave').value.trim();
+    if(!nombre || !usuario || !clave){ alert('Complet\u00e1 nombre, usuario y clave.'); return; }
+    if(state.users.some(function(u){ return u.usuario === usuario; })){ alert('Ese usuario ya existe, eleg\u00ed otro.'); return; }
+    var btn = document.getElementById('btnAddUser');
+    btn.disabled = true; btn.textContent = 'Guardando...';
+    state.users.push({ id: 'u_' + Date.now().toString(36), nombre: nombre, usuario: usuario, clave: clave, rol: rol, activo: true });
+    await saveUsers();
+    document.getElementById('u_nombre').value = '';
+    document.getElementById('u_usuario').value = '';
+    document.getElementById('u_clave').value = '';
+    btn.disabled = false; btn.textContent = 'Crear usuario';
+    refreshUserList();
+  }
+
+  function refreshUserList(){
+    var countEl = document.getElementById('userCount');
+    if(!countEl) return;
+    countEl.textContent = state.users.filter(function(u){ return u.activo !== false; }).length;
+    renderUserList();
+  }
+
+  function renderUserList(){
+    var el = document.getElementById('userList');
+    if(!el) return;
+    if(state.users.length === 0){ el.innerHTML = '<div style="color:var(--text-dim); font-size:14px;">Nada para mostrar.</div>'; return; }
+    var html = '';
+    state.users.forEach(function(u){
+      var isMe = state.currentUser && state.currentUser.usuario === u.usuario;
+      html += '<div class="admin-ticket">';
+      html += '  <div class="bar" style="background:' + (u.rol === 'admin' ? 'var(--accent)' : 'var(--baja)') + '"></div>';
+      html += '  <div class="admin-ticket-info"><div class="t">' + escapeHtml(u.nombre) + ' (' + escapeHtml(u.usuario) + ')' + (isMe ? ' \u2014 vos' : '') + '</div><div class="s">' + (u.rol === 'admin' ? 'Supervisor' : 'Operario') + (u.activo === false ? ' \u00b7 inactivo' : '') + '</div></div>';
+      html += '  <div class="admin-controls">';
+      if(!isMe){
+        html += '    <button class="icon-btn" data-toggleuser="' + u.id + '">' + (u.activo === false ? 'Activar' : 'Desactivar') + '</button>';
+        html += '    <button class="icon-btn" data-deluser="' + u.id + '">Eliminar</button>';
+      }
+      html += '  </div>';
+      html += '</div>';
+    });
+    el.innerHTML = html;
+
+    el.querySelectorAll('[data-toggleuser]').forEach(function(btn){
+      btn.onclick = async function(){
+        var id = btn.getAttribute('data-toggleuser');
+        var u = state.users.find(function(x){ return x.id === id; });
+        if(!u) return;
+        u.activo = (u.activo === false) ? true : false;
+        await saveUsers();
+        refreshUserList();
+      };
+    });
+    el.querySelectorAll('[data-deluser]').forEach(function(btn){
+      btn.onclick = function(){
+        var id = btn.getAttribute('data-deluser');
+        if(confirm('\u00bfEliminar este usuario definitivamente?')){
+          state.users = state.users.filter(function(x){ return x.id !== id; });
+          saveUsers().then(refreshUserList);
+        }
+      };
+    });
+  }
+
   async function handleAdd(){
     var sector = document.getElementById('f_sector').value.trim();
     var tarea = document.getElementById('f_tarea').value.trim();
@@ -550,7 +667,8 @@
     btn.disabled = true; btn.textContent = 'Guardando...';
     state.tickets.push({
       id: uid(), sector: sector, tarea: tarea, detalle: detalle,
-      prioridad: prioridad, estado: 'Pendiente', creado: Date.now(), terminadoEn: null
+      prioridad: prioridad, estado: 'Pendiente', creado: Date.now(), terminadoEn: null,
+      creadoPor: (state.currentUser ? state.currentUser.nombre : ''), iniciadoPor: null, terminadoPor: null
     });
     await saveTickets();
     document.getElementById('f_sector').value = '';
@@ -565,8 +683,9 @@
     var t = state.tickets.find(function(x){ return x.id === id; });
     if(!t) return;
     t[field] = value;
-    if(field === 'estado' && value === 'Terminada'){ t.terminadoEn = Date.now(); }
-    if(field === 'estado' && value !== 'Terminada'){ t.terminadoEn = null; }
+    if(field === 'estado' && value === 'Terminada'){ t.terminadoEn = Date.now(); t.terminadoPor = state.currentUser ? state.currentUser.nombre : ''; }
+    if(field === 'estado' && value === 'En curso'){ t.iniciadoPor = state.currentUser ? state.currentUser.nombre : ''; }
+    if(field === 'estado' && value === 'Pendiente'){ t.terminadoEn = null; }
     await saveTickets();
     if(mode === 'admin'){ refreshAdminLists(); } else { renderBoard(); }
   }
@@ -601,12 +720,17 @@
   async function handleLogin(){
     var user = document.getElementById('l_user').value.trim();
     var pass = document.getElementById('l_pass').value;
+    var btn = document.getElementById('btnLogin');
+    btn.disabled = true; btn.textContent = 'Verificando...';
 
-    if(user === CREDENTIALS.admin.user && pass === CREDENTIALS.admin.pass){
-      await enterMode('admin');
-    } else if(user === CREDENTIALS.operario.user && pass === CREDENTIALS.operario.pass){
-      await enterMode('board');
+    await loadUsers();
+    var found = state.users.find(function(u){ return u.usuario === user && u.clave === pass && u.activo !== false; });
+
+    if(found){
+      state.currentUser = found;
+      await enterMode(found.rol === 'admin' ? 'admin' : 'board');
     } else {
+      btn.disabled = false; btn.textContent = 'Ingresar';
       renderLogin('Usuario o contraseña incorrectos.');
     }
   }
@@ -617,6 +741,7 @@
     if(adminPollTimer){ clearInterval(adminPollTimer); adminPollTimer = null; }
     adminShellBuilt = false;
     mode = null;
+    state.currentUser = null;
     renderLogin();
   }
 
