@@ -14,5 +14,13 @@
     "clave": "1",
     "rol": "operario",
     "activo": true
+  },
+  {
+    "id": "u_testop2",
+    "nombre": "Operario Prueba 2",
+    "usuario": "testop2",
+    "clave": "1",
+    "rol": "operario",
+    "activo": true
   }
 ]
