@@ -183,6 +183,14 @@
     .board-main{ padding:14px 16px; }
     .ticket-title{ font-size:19px; }
   }
+  .board-btn{
+    padding:12px 20px; border-radius:8px; border:none; font-size:14px; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.03em; cursor:pointer; white-space:nowrap;
+  }
+  .board-btn-start{ background:var(--accent); color:#0B1013; }
+  .board-btn-start:active{ background:#3ABFBF; }
+  .board-btn-done{ background:var(--estado-terminada); color:#0B1013; }
+  .board-btn-done:active{ background:#5FC584; }
 </style>
 </head>
 <body>
@@ -305,11 +313,22 @@
     return 'tk_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
   }
 
+  function effectiveRank(t){
+    var base = PRIORITY_RANK[t.prioridad];
+    var ageDays = (Date.now() - t.creado) / 86400000;
+    var bonus = Math.floor(ageDays / 2);
+    return Math.min(4, base + bonus);
+  }
+
+  function isEscalated(t){
+    return effectiveRank(t) > PRIORITY_RANK[t.prioridad];
+  }
+
   function sortedActive(){
     return state.tickets
       .filter(function(t){ return t.estado !== 'Terminada'; })
       .sort(function(a,b){
-        var pr = PRIORITY_RANK[b.prioridad] - PRIORITY_RANK[a.prioridad];
+        var pr = effectiveRank(b) - effectiveRank(a);
         if(pr !== 0) return pr;
         return a.creado - b.creado;
       });
@@ -377,7 +396,9 @@
         html += '    <div class="ticket-right">';
         html += '      <span class="badge" style="background:' + PRIORITY_COLOR[t.prioridad] + '22; color:' + PRIORITY_COLOR[t.prioridad] + '; border:1px solid ' + PRIORITY_COLOR[t.prioridad] + '">' + t.prioridad + '</span>';
         html += '      <span class="badge" style="background:' + ESTADO_COLOR[t.estado] + '22; color:' + ESTADO_COLOR[t.estado] + '; border:1px solid ' + ESTADO_COLOR[t.estado] + '">' + t.estado + '</span>';
-        html += '      <span class="elapsed mono">' + elapsedLabel(t.creado) + '</span>';
+        html += '      <span class="elapsed mono">' + elapsedLabel(t.creado) + (isEscalated(t) ? " \u23eb" : '') + '</span>';
+        if(t.estado === 'Pendiente'){ html += '      <button class="board-btn board-btn-start" data-action="iniciar" data-id="' + t.id + '">Comenzar</button>'; }
+        html += '      <button class="board-btn board-btn-done" data-action="terminar" data-id="' + t.id + '">Terminar</button>';
         html += '    </div>';
         html += '  </div>';
         html += '</div>';
@@ -401,6 +422,14 @@
     app.innerHTML = html;
     updateSyncNote();
     document.getElementById('logoutLink').onclick = function(e){ e.preventDefault(); logout(); };
+    app.querySelectorAll('.board-btn').forEach(function(btn){
+      btn.onclick = function(){
+        var id = btn.getAttribute('data-id');
+        var action = btn.getAttribute('data-action');
+        if(action === 'iniciar'){ updateTicket(id, 'estado', 'En curso'); }
+        else if(action === 'terminar'){ if(confirm('\u00bfMarcar esta tarea como Terminada?')){ updateTicket(id, 'estado', 'Terminada'); } }
+      };
+    });
   }
 
   function updateSyncNote(){
@@ -475,7 +504,7 @@
     list.forEach(function(t){
       html += '<div class="admin-ticket">';
       html += '  <div class="bar" style="background:' + PRIORITY_COLOR[t.prioridad] + '"></div>';
-      html += '  <div class="admin-ticket-info"><div class="t">' + escapeHtml(t.sector) + ' — ' + escapeHtml(t.tarea) + '</div><div class="s">' + elapsedLabel(t.creado) + (t.detalle ? ' · ' + escapeHtml(t.detalle) : '') + '</div></div>';
+      html += '  <div class="admin-ticket-info"><div class="t">' + escapeHtml(t.sector) + ' — ' + escapeHtml(t.tarea) + '</div><div class="s">' + elapsedLabel(t.creado) + (isEscalated(t) ? " \u23eb" : '') + (t.detalle ? ' · ' + escapeHtml(t.detalle) : '') + '</div></div>';
       html += '  <div class="admin-controls">';
       if(!isDone){
         html += '    <select data-id="' + t.id + '" data-field="prioridad" class="sel-field">';
@@ -539,7 +568,7 @@
     if(field === 'estado' && value === 'Terminada'){ t.terminadoEn = Date.now(); }
     if(field === 'estado' && value !== 'Terminada'){ t.terminadoEn = null; }
     await saveTickets();
-    refreshAdminLists();
+    if(mode === 'admin'){ refreshAdminLists(); } else { renderBoard(); }
   }
 
   async function deleteTicket(id){
