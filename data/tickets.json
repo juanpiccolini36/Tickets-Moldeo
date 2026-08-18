@@ -11,5 +11,18 @@
     "creadoPor": "Supervisor",
     "iniciadoPor": "Diego Pintos",
     "terminadoPor": "Diego Pintos"
+  },
+  {
+    "id": "tk_msytp9lbzzvjc",
+    "sector": "M-241",
+    "tarea": "Retirar matriz de Criba 590mm x 610mm. Guardar en palet nº2.",
+    "detalle": "",
+    "prioridad": "Urgente",
+    "estado": "Pendiente",
+    "creado": 1787067253199,
+    "terminadoEn": null,
+    "creadoPor": "Supervisor",
+    "iniciadoPor": null,
+    "terminadoPor": null
   }
 ]
