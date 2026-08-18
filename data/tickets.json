@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "tk_msyn6xfgta5uj",
+    "sector": "M-242",
+    "tarea": "Retirar matriz y guardarla en el pallet nº60.",
+    "detalle": "",
+    "prioridad": "Urgente",
+    "estado": "Pendiente",
+    "creado": 1787056319932,
+    "terminadoEn": null
+  }
+]
