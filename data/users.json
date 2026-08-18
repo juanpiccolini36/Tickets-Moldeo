@@ -14,13 +14,5 @@
     "clave": "tickets2026",
     "rol": "operario",
     "activo": true
-  },
-  {
-    "id": "u_msyopyr8",
-    "nombre": "Pedro Test",
-    "usuario": "pedro",
-    "clave": "1234",
-    "rol": "operario",
-    "activo": true
   }
 ]
