@@ -8,14 +8,6 @@
     "activo": true
   },
   {
-    "id": "u_op1",
-    "nombre": "Operario",
-    "usuario": "operario",
-    "clave": "tickets2026",
-    "rol": "operario",
-    "activo": true
-  },
-  {
     "id": "u_msyt2us4",
     "nombre": "Diego Pintos",
     "usuario": "Dpintos",
