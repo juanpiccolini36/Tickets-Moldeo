@@ -14,5 +14,13 @@
     "clave": "tickets2026",
     "rol": "operario",
     "activo": true
+  },
+  {
+    "id": "u_msyt2us4",
+    "nombre": "Diego Pintos",
+    "usuario": "Dpintos",
+    "clave": "1",
+    "rol": "operario",
+    "activo": true
   }
 ]
