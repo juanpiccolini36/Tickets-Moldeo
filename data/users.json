@@ -1,9 +1,9 @@
 [
   {
     "id": "u_admin1",
-    "nombre": "Supervisor",
-    "usuario": "supervisor",
-    "clave": "moldeo2026",
+    "nombre": "Juan Piccolini",
+    "usuario": "jpiccolini",
+    "clave": "1",
     "rol": "admin",
     "activo": true
   },
