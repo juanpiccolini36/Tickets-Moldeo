@@ -228,8 +228,7 @@
 
   // ---------- helpers de codificación (texto con tildes/ñ <-> base64) ----------
   function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
-  function b64ToUtf8(str){ return decodeURIComponent(escape(atob(str.replace(/
-/g, '')))); }
+  function b64ToUtf8(str){ return decodeURIComponent(escape(atob(str.split(String.fromCharCode(10)).join('')))); }
 
   // ---------- storage helpers (GitHub Contents API) ----------
   async function loadTickets(){
@@ -297,11 +296,7 @@
         return saveTickets(true);
       }
       var detail = (e && e.message) ? e.message : String(e);
-      alert('No se pudo guardar en GitHub.
-
-Detalle: ' + detail + '
-
-El cambio quedó visible en tu pantalla, pero puede no haberse sincronizado con la tablet.');
+      var NL = String.fromCharCode(10); alert('No se pudo guardar en GitHub.' + NL + NL + 'Detalle: ' + detail + NL + NL + 'El cambio quedó visible en tu pantalla, pero puede no haberse sincronizado con la tablet.');
       return false;
     }
   }
