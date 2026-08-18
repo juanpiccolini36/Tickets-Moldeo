@@ -442,9 +442,14 @@
     return d.innerHTML;
   }
 
+  function visibleForCurrentUser(list){
+    if(!state.currentUser || state.currentUser.rol === 'admin'){ return list; }
+    return list.filter(function(t){ return !t.asignadoA || t.asignadoA === state.currentUser.id; });
+  }
+
   function renderBoard(){
     var app = document.getElementById('app');
-    var active = sortedActive();
+    var active = visibleForCurrentUser(sortedActive());
     var counts = { 'Urgente':0,'Alta':0,'Media':0,'Baja':0 };
     active.forEach(function(t){ counts[t.prioridad] = (counts[t.prioridad]||0) + 1; });
 
@@ -492,7 +497,7 @@
       html += '</tbody></table></div>';
     }
 
-    var done = doneToday();
+    var done = visibleForCurrentUser(doneToday());
     if(done.length){
       html += '<div class="done-strip"><h3>Completadas hoy</h3>';
       html += '<div class="board-table-wrap"><table class="board-table board-table-compact"><thead><tr><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Finalizado</th><th>Por</th></tr></thead><tbody>';
@@ -545,6 +550,7 @@
     html += '    <div class="form-grid">';
     html += '      <div><label>Sector / Máquina</label><input type="text" id="f_sector" placeholder="Ej: Matriz 12 / Prensa 4"></div>';
     html += '      <div><label>Prioridad</label><select id="f_prioridad"><option>Urgente</option><option>Alta</option><option selected>Media</option><option>Baja</option></select></div>';
+    html += '      <div class="full"><label>Asignado a</label><select id="f_asignado"><option value="">Sin asignar (todos)</option></select></div>';
     html += '      <div class="full"><label>Tarea</label><input type="text" id="f_tarea" placeholder="Descripción breve de la tarea"></div>';
     html += '      <div class="full"><label>Detalle (opcional)</label><textarea id="f_detalle" placeholder="Aclaraciones, repuestos necesarios, etc."></textarea></div>';
     html += '    </div>';
@@ -587,6 +593,7 @@ html += '</div>'; // cierre section-usuarios
     app.innerHTML = html;
 
     document.getElementById('btnAdd').onclick = handleAdd;
+    refreshAssignSelect();
     document.getElementById('btnAddUser').onclick = handleAddUser;
     document.getElementById('adminNavSelect').onchange = function(){
       var val = this.value;
@@ -642,7 +649,8 @@ html += '</div>'; // cierre section-usuarios
       if(t.estado === 'En curso' && t.iniciadoPor){ attrib = ' \u00b7 iniciado por ' + escapeHtml(t.iniciadoPor); }
       if(t.estado === 'Pausada'){ attrib = ' \u00b7 pausada' + (t.iniciadoPor ? ' (iniciada por ' + escapeHtml(t.iniciadoPor) + ')' : ''); }
       if(t.estado === 'Terminada' && t.terminadoPor){ attrib = ' \u00b7 terminado por ' + escapeHtml(t.terminadoPor); }
-      html += '  <div class="admin-ticket-info"><div class="t">' + escapeHtml(t.sector) + ' \u2014 ' + escapeHtml(t.tarea) + '</div><div class="s">' + elapsedLabel(t.creado) + (isEscalated(t) ? " \u23eb" : '') + (t.detalle ? ' \u00b7 ' + escapeHtml(t.detalle) : '') + attrib + '</div></div>';
+      var asigLabel = t.asignadoANombre ? ' \u00b7 asignado a ' + escapeHtml(t.asignadoANombre) : ' \u00b7 sin asignar';
+      html += '  <div class="admin-ticket-info"><div class="t">' + escapeHtml(t.sector) + ' \u2014 ' + escapeHtml(t.tarea) + '</div><div class="s">' + elapsedLabel(t.creado) + (isEscalated(t) ? " \u23eb" : '') + (t.detalle ? ' \u00b7 ' + escapeHtml(t.detalle) : '') + attrib + asigLabel + '</div></div>';
       html += '  <div class="admin-controls">';
       if(!isDone){
         html += '    <select data-id="' + t.id + '" data-field="prioridad" class="sel-field">';
@@ -717,6 +725,7 @@ html += '</div>'; // cierre section-usuarios
   }
 
   function refreshUserList(){
+    refreshAssignSelect();
     var countEl = document.getElementById('userCount');
     if(!countEl) return;
     countEl.textContent = state.users.filter(function(u){ return u.activo !== false; }).length;
@@ -806,11 +815,25 @@ html += '</div>'; // cierre section-usuarios
     });
   }
 
+  function refreshAssignSelect(){
+    var sel = document.getElementById('f_asignado');
+    if(!sel) return;
+    var current = sel.value;
+    var html = '<option value="">Sin asignar (todos)</option>';
+    state.users.filter(function(u){ return u.rol === 'operario' && u.activo !== false; }).forEach(function(u){
+      html += '<option value="' + u.id + '">' + escapeHtml(u.nombre) + '</option>';
+    });
+    sel.innerHTML = html;
+    if(state.users.some(function(u){ return u.id === current; })){ sel.value = current; }
+  }
+
   async function handleAdd(){
     var sector = document.getElementById('f_sector').value.trim();
     var tarea = document.getElementById('f_tarea').value.trim();
     var detalle = document.getElementById('f_detalle').value.trim();
     var prioridad = document.getElementById('f_prioridad').value;
+    var asignadoId = document.getElementById('f_asignado').value;
+    var asignadoUser = asignadoId ? state.users.find(function(u){ return u.id === asignadoId; }) : null;
     if(!sector || !tarea){
       alert('Completá al menos Sector/Máquina y Tarea.');
       return;
@@ -820,13 +843,15 @@ html += '</div>'; // cierre section-usuarios
     state.tickets.push({
       id: uid(), sector: sector, tarea: tarea, detalle: detalle,
       prioridad: prioridad, estado: 'Pendiente', creado: Date.now(), iniciadoEn: null, terminadoEn: null, pausadoEn: null,
-      creadoPor: (state.currentUser ? state.currentUser.nombre : ''), iniciadoPor: null, terminadoPor: null
+      creadoPor: (state.currentUser ? state.currentUser.nombre : ''), iniciadoPor: null, terminadoPor: null,
+      asignadoA: asignadoId || null, asignadoANombre: asignadoUser ? asignadoUser.nombre : null
     });
     await saveTickets();
     document.getElementById('f_sector').value = '';
     document.getElementById('f_tarea').value = '';
     document.getElementById('f_detalle').value = '';
     document.getElementById('f_prioridad').value = 'Media';
+    document.getElementById('f_asignado').value = '';
     btn.disabled = false; btn.textContent = 'Crear ticket';
     refreshAdminLists();
   }
