@@ -5,11 +5,11 @@
     "tarea": "Retirar matriz de Panel 600x600mm y guardarlo en el palet nº60.",
     "detalle": "Antes de guardar todo reparar la matriz de repuesto con su extractor por rotura durante el moldeo de una pieza.",
     "prioridad": "Baja",
-    "estado": "Pendiente",
+    "estado": "En curso",
     "creado": 1787066906536,
     "terminadoEn": null,
     "creadoPor": "Supervisor",
-    "iniciadoPor": null,
+    "iniciadoPor": "Diego Pintos",
     "terminadoPor": null
   }
 ]
