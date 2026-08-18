@@ -24,5 +24,22 @@
     "creadoPor": "Supervisor",
     "iniciadoPor": "Diego Pintos",
     "terminadoPor": "Diego Pintos"
+  },
+  {
+    "id": "tk_msz10zi2uucen",
+    "sector": "M-111",
+    "tarea": "Retirar matriz de cribas 80x40mm y guardarla en el palet nº245.",
+    "detalle": "Guardar todos los accesorios en el palet, laterales removibles, extractor y chapa superior.",
+    "prioridad": "Baja",
+    "estado": "Pendiente",
+    "creado": 1787079557306,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
