@@ -31,14 +31,14 @@
     "tarea": "Retirar matriz de cribas 80x40mm y guardarla en el palet nº245.",
     "detalle": "Guardar todos los accesorios en el palet, laterales removibles, extractor y chapa superior.",
     "prioridad": "Baja",
-    "estado": "En curso",
+    "estado": "Terminada",
     "creado": 1787079557306,
     "iniciadoEn": 1787079636075,
-    "terminadoEn": null,
+    "terminadoEn": 1787079666804,
     "pausadoEn": 1787079642024,
     "creadoPor": "Juan Piccolini",
     "iniciadoPor": "Diego Pintos",
-    "terminadoPor": null,
+    "terminadoPor": "Diego Pintos",
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
   }
