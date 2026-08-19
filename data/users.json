@@ -22,5 +22,13 @@
     "clave": "1",
     "rol": "operario",
     "activo": true
+  },
+  {
+    "id": "u_mt00kaax",
+    "nombre": "Juan Giacosa",
+    "usuario": "jgiacosa",
+    "clave": "1",
+    "rol": "admin",
+    "activo": true
   }
 ]
