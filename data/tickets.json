@@ -92,5 +92,22 @@
     "terminadoPor": null,
     "asignadoA": "u_mt00jxsx",
     "asignadoANombre": "Martin Coronel"
+  },
+  {
+    "id": "tk_mt00sx1e8m11q",
+    "sector": "M-242",
+    "tarea": "Sacar matriz de criba 600x600mm y guardar en el palet nº60.",
+    "detalle": "Envolver el palet y sacarlo al lugar correspondiente en el campo.",
+    "prioridad": "Media",
+    "estado": "Pendiente",
+    "creado": 1787139647042,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
