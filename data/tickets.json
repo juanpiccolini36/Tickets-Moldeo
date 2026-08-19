@@ -109,17 +109,5 @@
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
-  },
-  {
-    "id": "tk_estadobug",
-    "sector": "Matriz TEST",
-    "tarea": "Prueba visual del bug de estado",
-    "detalle": "",
-    "prioridad": "Media",
-    "estado": "En curso",
-    "creado": 1787147434964,
-    "asignadoA": null,
-    "iniciadoEn": 1787147509948,
-    "iniciadoPor": "Diego Pintos"
   }
 ]
