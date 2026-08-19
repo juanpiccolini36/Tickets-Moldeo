@@ -234,6 +234,13 @@
   .board-btn-pause:active{ background:#E8B65C; }
   .board-btn-resume{ background:var(--accent); color:#0B1013; }
   .board-btn-resume:active{ background:#3ABFBF; }
+  .counts-strip{ justify-content:space-between; }
+  .filter-toggle-btn{
+    padding:8px 16px; border-radius:8px; border:1px solid var(--line);
+    background:var(--panel-2); color:var(--text-dim); font-size:13px; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.03em; cursor:pointer;
+  }
+  .filter-toggle-btn.active{ background:var(--accent); color:#0B1013; border-color:var(--accent); }
 </style>
 </head>
 <body>
@@ -301,47 +308,39 @@
     state.lastSync = new Date();
   }
 
-  async function saveTickets(isRetry){
-    try{
+  async function saveTicketsSafely(applyMutation){
+    for(var attempt=0; attempt<3; attempt++){
+      if(attempt > 0){ await loadTickets(); }
+      applyMutation();
       var content = JSON.stringify(state.tickets, null, 2);
-      var body = {
-        message: 'Actualizar tickets — ' + new Date().toISOString(),
-        content: utf8ToB64(content)
-      };
+      var body = { message: 'Actualizar tickets \u2014 ' + new Date().toISOString(), content: utf8ToB64(content) };
       if(state.fileSha){ body.sha = state.fileSha; }
-
-      var res = await fetch(GH_API, {
-        method: 'PUT',
-        headers: {
-          'Authorization': 'Bearer ' + GH_TOKEN,
-          'Accept': 'application/vnd.github+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-      });
-
-      if(!res.ok){
-        if(res.status === 409 && !isRetry){
-          // Conflicto: otro dispositivo guardó primero. Traemos su versión y reintentamos una vez.
-          await loadTickets();
-          return saveTickets(true);
+      try{
+        var res = await fetch(GH_API, {
+          method: 'PUT',
+          headers: { 'Authorization': 'Bearer ' + GH_TOKEN, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if(res.ok){
+          var data = await res.json();
+          state.fileSha = data.content.sha;
+          return true;
         }
+        if(res.status === 409){ continue; }
         var errText = await res.text();
-        throw new Error('HTTP ' + res.status + ' — ' + errText.slice(0,200));
+        throw new Error('HTTP ' + res.status + ' \u2014 ' + errText.slice(0,200));
+      }catch(e){
+        console.error('Error guardando tickets en GitHub', e);
+        if(attempt === 2){
+          var detail = (e && e.message) ? e.message : String(e);
+          var NL = String.fromCharCode(10);
+          alert('No se pudo guardar en GitHub.' + NL + NL + 'Detalle: ' + detail + NL + NL + 'El cambio qued\u00f3 visible en tu pantalla, pero puede no haberse sincronizado con la tablet.');
+          return false;
+        }
+        await new Promise(function(r){ setTimeout(r, 700); });
       }
-      var data = await res.json();
-      state.fileSha = data.content.sha;
-      return true;
-    }catch(e){
-      console.error('Error guardando tickets en GitHub', e);
-      if(!isRetry){
-        await new Promise(function(r){ setTimeout(r, 900); });
-        return saveTickets(true);
-      }
-      var detail = (e && e.message) ? e.message : String(e);
-      var NL = String.fromCharCode(10); alert('No se pudo guardar en GitHub.' + NL + NL + 'Detalle: ' + detail + NL + NL + 'El cambio quedó visible en tu pantalla, pero puede no haberse sincronizado con la tablet.');
-      return false;
     }
+    return false;
   }
 
   async function loadUsers(){
@@ -361,25 +360,37 @@
     }
   }
 
-  async function saveUsers(){
-    try{
+  async function saveUsersSafely(applyMutation){
+    for(var attempt=0; attempt<3; attempt++){
+      if(attempt > 0){ await loadUsers(); }
+      applyMutation();
       var content = JSON.stringify(state.users, null, 2);
       var body = { message: 'Actualizar usuarios \u2014 ' + new Date().toISOString(), content: utf8ToB64(content) };
       if(state.usersSha){ body.sha = state.usersSha; }
-      var res = await fetch(GH_USERS_API, {
-        method: 'PUT',
-        headers: { 'Authorization': 'Bearer ' + GH_TOKEN, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      if(!res.ok){ var errText = await res.text(); throw new Error('HTTP ' + res.status + ' \u2014 ' + errText.slice(0,200)); }
-      var data = await res.json();
-      state.usersSha = data.content.sha;
-      return true;
-    }catch(e){
-      console.error('Error guardando usuarios en GitHub', e);
-      alert('No se pudo guardar el usuario. Prob\u00e1 de nuevo.');
-      return false;
+      try{
+        var res = await fetch(GH_USERS_API, {
+          method: 'PUT',
+          headers: { 'Authorization': 'Bearer ' + GH_TOKEN, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if(res.ok){
+          var data = await res.json();
+          state.usersSha = data.content.sha;
+          return true;
+        }
+        if(res.status === 409){ continue; }
+        var errText = await res.text();
+        throw new Error('HTTP ' + res.status + ' \u2014 ' + errText.slice(0,200));
+      }catch(e){
+        console.error('Error guardando usuarios en GitHub', e);
+        if(attempt === 2){
+          alert('No se pudo guardar el usuario. Prob\u00e1 de nuevo.');
+          return false;
+        }
+        await new Promise(function(r){ setTimeout(r, 700); });
+      }
     }
+    return false;
   }
 
   function uid(){
@@ -442,14 +453,10 @@
     return d.innerHTML;
   }
 
-  function visibleForCurrentUser(list){
-    if(!state.currentUser || state.currentUser.rol === 'admin'){ return list; }
-    return list.filter(function(t){ return !t.asignadoA || t.asignadoA === state.currentUser.id; });
-  }
-
   function renderBoard(){
     var app = document.getElementById('app');
-    var active = visibleForCurrentUser(sortedActive());
+    var allActive = sortedActive();
+    var active = (boardFilterMine && state.currentUser) ? allActive.filter(function(t){ return t.asignadoA === state.currentUser.id; }) : allActive;
     var counts = { 'Urgente':0,'Alta':0,'Media':0,'Baja':0 };
     active.forEach(function(t){ counts[t.prioridad] = (counts[t.prioridad]||0) + 1; });
 
@@ -467,6 +474,7 @@
     ['Urgente','Alta','Media','Baja'].forEach(function(p){
       html += '<div class="count-pill"><span class="sw" style="background:' + PRIORITY_COLOR[p] + '"></span>' + p.toUpperCase() + ' <span class="count-num mono">' + counts[p] + '</span></div>';
     });
+    html += '<button id="boardFilterToggle" class="filter-toggle-btn' + (boardFilterMine ? ' active' : '') + '">' + (boardFilterMine ? '\u2713 Solo mis tareas' : 'Ver solo mis tareas') + '</button>';
     html += '</div>';
 
     html += '<div class="board-main">';
@@ -497,7 +505,8 @@
       html += '</tbody></table></div>';
     }
 
-    var done = visibleForCurrentUser(doneToday());
+    var allDone = doneToday();
+    var done = (boardFilterMine && state.currentUser) ? allDone.filter(function(t){ return t.asignadoA === state.currentUser.id; }) : allDone;
     if(done.length){
       html += '<div class="done-strip"><h3>Completadas hoy</h3>';
       html += '<div class="board-table-wrap"><table class="board-table board-table-compact"><thead><tr><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Finalizado</th><th>Por</th></tr></thead><tbody>';
@@ -514,6 +523,7 @@
     app.innerHTML = html;
     updateSyncNote();
     document.getElementById('logoutLink').onclick = function(e){ e.preventDefault(); logout(); };
+    document.getElementById('boardFilterToggle').onclick = function(){ boardFilterMine = !boardFilterMine; renderBoard(); };
     app.querySelectorAll('.board-btn').forEach(function(btn){
       btn.onclick = function(){
         var id = btn.getAttribute('data-id');
@@ -536,6 +546,7 @@
   var adminShellBuilt = false;
   var editingTicketId = null;
   var editingUserId = null;
+  var boardFilterMine = false;
 
   function buildAdminShell(){
     var app = document.getElementById('app');
@@ -688,10 +699,11 @@ html += '</div>'; // cierre section-usuarios
         var tarea = card.querySelector('.edit-tarea').value.trim();
         var detalle = card.querySelector('.edit-detalle').value.trim();
         if(!sector || !tarea){ alert('Sector/M\u00e1quina y Tarea no pueden quedar vac\u00edos.'); return; }
-        var t = state.tickets.find(function(x){ return x.id === id; });
-        if(t){ t.sector = sector; t.tarea = tarea; t.detalle = detalle; }
         btn.disabled = true; btn.textContent = 'Guardando...';
-        await saveTickets();
+        await saveTicketsSafely(function(){
+          var t = state.tickets.find(function(x){ return x.id === id; });
+          if(t){ t.sector = sector; t.tarea = tarea; t.detalle = detalle; }
+        });
         editingTicketId = null;
         refreshAdminLists();
       };
@@ -715,8 +727,8 @@ html += '</div>'; // cierre section-usuarios
     if(state.users.some(function(u){ return u.usuario === usuario; })){ alert('Ese usuario ya existe, eleg\u00ed otro.'); return; }
     var btn = document.getElementById('btnAddUser');
     btn.disabled = true; btn.textContent = 'Guardando...';
-    state.users.push({ id: 'u_' + Date.now().toString(36), nombre: nombre, usuario: usuario, clave: clave, rol: rol, activo: true });
-    await saveUsers();
+    var newUser = { id: 'u_' + Date.now().toString(36), nombre: nombre, usuario: usuario, clave: clave, rol: rol, activo: true };
+    await saveUsersSafely(function(){ state.users.push(newUser); });
     document.getElementById('u_nombre').value = '';
     document.getElementById('u_usuario').value = '';
     document.getElementById('u_clave').value = '';
@@ -785,11 +797,13 @@ html += '</div>'; // cierre section-usuarios
         var rol = card.querySelector('.edit-u-rol').value;
         if(!nombre || !usuario || !clave){ alert('Complet\u00e1 nombre, usuario y clave.'); return; }
         if(state.users.some(function(x){ return x.usuario === usuario && x.id !== id; })){ alert('Ese usuario ya existe, eleg\u00ed otro.'); return; }
-        var u = state.users.find(function(x){ return x.id === id; });
-        if(u){ u.nombre = nombre; u.usuario = usuario; u.clave = clave; u.rol = rol; }
         btn.disabled = true; btn.textContent = 'Guardando...';
-        await saveUsers();
-        if(state.currentUser && state.currentUser.id === id){ state.currentUser = u; }
+        await saveUsersSafely(function(){
+          var u = state.users.find(function(x){ return x.id === id; });
+          if(u){ u.nombre = nombre; u.usuario = usuario; u.clave = clave; u.rol = rol; }
+        });
+        var updated = state.users.find(function(x){ return x.id === id; });
+        if(state.currentUser && state.currentUser.id === id){ state.currentUser = updated; }
         editingUserId = null;
         refreshUserList();
       };
@@ -797,10 +811,10 @@ html += '</div>'; // cierre section-usuarios
     el.querySelectorAll('[data-toggleuser]').forEach(function(btn){
       btn.onclick = async function(){
         var id = btn.getAttribute('data-toggleuser');
-        var u = state.users.find(function(x){ return x.id === id; });
-        if(!u) return;
-        u.activo = (u.activo === false) ? true : false;
-        await saveUsers();
+        await saveUsersSafely(function(){
+          var u = state.users.find(function(x){ return x.id === id; });
+          if(u){ u.activo = (u.activo === false) ? true : false; }
+        });
         refreshUserList();
       };
     });
@@ -808,8 +822,9 @@ html += '</div>'; // cierre section-usuarios
       btn.onclick = function(){
         var id = btn.getAttribute('data-deluser');
         if(confirm('\u00bfEliminar este usuario definitivamente?')){
-          state.users = state.users.filter(function(x){ return x.id !== id; });
-          saveUsers().then(refreshUserList);
+          saveUsersSafely(function(){
+            state.users = state.users.filter(function(x){ return x.id !== id; });
+          }).then(refreshUserList);
         }
       };
     });
@@ -835,18 +850,18 @@ html += '</div>'; // cierre section-usuarios
     var asignadoId = document.getElementById('f_asignado').value;
     var asignadoUser = asignadoId ? state.users.find(function(u){ return u.id === asignadoId; }) : null;
     if(!sector || !tarea){
-      alert('Completá al menos Sector/Máquina y Tarea.');
+      alert('Complet\u00e1 al menos Sector/M\u00e1quina y Tarea.');
       return;
     }
     var btn = document.getElementById('btnAdd');
     btn.disabled = true; btn.textContent = 'Guardando...';
-    state.tickets.push({
+    var newTicket = {
       id: uid(), sector: sector, tarea: tarea, detalle: detalle,
       prioridad: prioridad, estado: 'Pendiente', creado: Date.now(), iniciadoEn: null, terminadoEn: null, pausadoEn: null,
       creadoPor: (state.currentUser ? state.currentUser.nombre : ''), iniciadoPor: null, terminadoPor: null,
       asignadoA: asignadoId || null, asignadoANombre: asignadoUser ? asignadoUser.nombre : null
-    });
-    await saveTickets();
+    };
+    await saveTicketsSafely(function(){ state.tickets.push(newTicket); });
     document.getElementById('f_sector').value = '';
     document.getElementById('f_tarea').value = '';
     document.getElementById('f_detalle').value = '';
@@ -857,23 +872,25 @@ html += '</div>'; // cierre section-usuarios
   }
 
   async function updateTicket(id, field, value){
-    var t = state.tickets.find(function(x){ return x.id === id; });
-    if(!t) return;
-    t[field] = value;
-    if(field === 'estado' && value === 'Terminada'){ t.terminadoEn = Date.now(); t.terminadoPor = state.currentUser ? state.currentUser.nombre : ''; }
-    if(field === 'estado' && value === 'En curso'){
-      if(!t.iniciadoEn){ t.iniciadoEn = Date.now(); }
-      t.iniciadoPor = state.currentUser ? state.currentUser.nombre : '';
-    }
-    if(field === 'estado' && value === 'Pausada'){ t.pausadoEn = Date.now(); }
-    if(field === 'estado' && value === 'Pendiente'){ t.terminadoEn = null; }
-    await saveTickets();
+    await saveTicketsSafely(function(){
+      var t = state.tickets.find(function(x){ return x.id === id; });
+      if(!t) return;
+      t[field] = value;
+      if(field === 'estado' && value === 'Terminada'){ t.terminadoEn = Date.now(); t.terminadoPor = state.currentUser ? state.currentUser.nombre : ''; }
+      if(field === 'estado' && value === 'En curso'){
+        if(!t.iniciadoEn){ t.iniciadoEn = Date.now(); }
+        t.iniciadoPor = state.currentUser ? state.currentUser.nombre : '';
+      }
+      if(field === 'estado' && value === 'Pausada'){ t.pausadoEn = Date.now(); }
+      if(field === 'estado' && value === 'Pendiente'){ t.terminadoEn = null; }
+    });
     if(mode === 'admin'){ refreshAdminLists(); } else { renderBoard(); }
   }
 
   async function deleteTicket(id){
-    state.tickets = state.tickets.filter(function(x){ return x.id !== id; });
-    await saveTickets();
+    await saveTicketsSafely(function(){
+      state.tickets = state.tickets.filter(function(x){ return x.id !== id; });
+    });
     refreshAdminLists();
   }
 
