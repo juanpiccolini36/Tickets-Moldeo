@@ -41,5 +41,15 @@
     "terminadoPor": "Diego Pintos",
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_supervisorB",
+    "sector": "Matriz B",
+    "tarea": "Ticket de Supervisor B",
+    "detalle": "",
+    "prioridad": "Baja",
+    "estado": "Pendiente",
+    "creado": 1787138937063,
+    "asignadoA": null
   }
 ]
