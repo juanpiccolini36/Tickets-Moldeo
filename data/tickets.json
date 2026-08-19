@@ -82,7 +82,7 @@
     "tarea": "Traer matriz desde Herreria y dejarla en el sector para comenzar la produccion.",
     "detalle": "",
     "prioridad": "Alta",
-    "estado": "Pausada",
+    "estado": "En curso",
     "creado": 1787139536852,
     "iniciadoEn": 1787147331260,
     "terminadoEn": null,
