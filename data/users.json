@@ -30,5 +30,13 @@
     "clave": "1",
     "rol": "admin",
     "activo": true
+  },
+  {
+    "id": "u_mt00km7t",
+    "nombre": "Pablo Diaz",
+    "usuario": "pdiaz",
+    "clave": "1",
+    "rol": "operario",
+    "activo": true
   }
 ]
