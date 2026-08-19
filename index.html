@@ -257,6 +257,14 @@
   }
   .logout-link-inline:hover{ color:var(--text); border-color:var(--text-dim); }
   .section-title{ font-size:16px; margin:20px 28px 12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; }
+  .priority-summary{
+    display:flex; align-items:stretch; border:1px solid var(--line); border-radius:8px;
+    overflow:hidden; background:var(--panel-2);
+  }
+  .priority-summary .count-pill{
+    border-radius:0; background:transparent; border-right:1px solid var(--line); margin:0;
+  }
+  .priority-summary .count-pill:last-child{ border-right:none; }
 </style>
 </head>
 <body>
@@ -534,9 +542,11 @@
 
     var html = renderBoardHeader();
     html += '<div class="counts-strip">';
+    html += '<div class="priority-summary">';
     ['Urgente','Alta','Media','Baja'].forEach(function(p){
       html += '<div class="count-pill"><span class="sw" style="background:' + PRIORITY_COLOR[p] + '"></span>' + p.toUpperCase() + ' <span class="count-num mono">' + counts[p] + '</span></div>';
     });
+    html += '</div>';
     html += '<button id="boardFilterToggle" class="filter-toggle-btn' + (boardFilterMine ? ' active' : '') + '">' + (boardFilterMine ? '\u2713 Solo mis tareas' : 'Ver solo mis tareas') + '</button>';
     html += '</div>';
 
@@ -584,7 +594,6 @@
     html += '</div>';
 
     html += '<div class="sync-note mono" id="syncNote"></div>';
-    html += '<a href="#" class="logout-link" id="logoutLink">Cerrar sesi\u00f3n</a>';
 
     app.innerHTML = html;
     updateSyncNote();
