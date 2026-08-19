@@ -116,8 +116,10 @@
     "tarea": "Prueba visual del bug de estado",
     "detalle": "",
     "prioridad": "Media",
-    "estado": "Pendiente",
+    "estado": "En curso",
     "creado": 1787147434964,
-    "asignadoA": null
+    "asignadoA": null,
+    "iniciadoEn": 1787147509948,
+    "iniciadoPor": "Diego Pintos"
   }
 ]
