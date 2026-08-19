@@ -58,5 +58,22 @@
     "terminadoPor": null,
     "asignadoA": "u_mt00jxsx",
     "asignadoANombre": "Martin Coronel"
+  },
+  {
+    "id": "tk_mt00n68usteso",
+    "sector": "Moldeo",
+    "tarea": "Traer palet nº206 y dejarlo en el puesto de trabajo de Matriceria.",
+    "detalle": "",
+    "prioridad": "Media",
+    "estado": "Pendiente",
+    "creado": 1787139379038,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_mt00jxsx",
+    "asignadoANombre": "Martin Coronel"
   }
 ]
