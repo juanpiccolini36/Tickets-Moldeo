@@ -109,5 +109,17 @@
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_colviewtest",
+    "sector": "Matriz 15",
+    "tarea": "Prueba visual de columnas",
+    "detalle": "ver creado por y asignado a",
+    "prioridad": "Alta",
+    "estado": "Pendiente",
+    "creado": 1787144928360,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos",
+    "creadoPor": "Juan Piccolini"
   }
 ]
