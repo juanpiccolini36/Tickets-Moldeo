@@ -99,14 +99,14 @@
     "tarea": "Sacar matriz de criba 600x600mm y guardar en el palet nº60.",
     "detalle": "Envolver el palet y sacarlo al lugar correspondiente en el campo.",
     "prioridad": "Media",
-    "estado": "Pendiente",
+    "estado": "Terminada",
     "creado": 1787139647042,
     "iniciadoEn": null,
-    "terminadoEn": null,
+    "terminadoEn": 1787148952387,
     "pausadoEn": null,
     "creadoPor": "Juan Piccolini",
     "iniciadoPor": null,
-    "terminadoPor": null,
+    "terminadoPor": "Diego Pintos",
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
   }
