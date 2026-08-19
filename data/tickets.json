@@ -51,5 +51,15 @@
     "estado": "Pendiente",
     "creado": 1787138937063,
     "asignadoA": null
+  },
+  {
+    "id": "tk_supervisorA",
+    "sector": "Matriz A",
+    "tarea": "Ticket de Supervisor A",
+    "detalle": "",
+    "prioridad": "Alta",
+    "creado": 1787138952299,
+    "estado": "Pendiente",
+    "asignadoA": null
   }
 ]
