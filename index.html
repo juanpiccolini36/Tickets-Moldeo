@@ -241,6 +241,7 @@
     text-transform:uppercase; letter-spacing:0.03em; cursor:pointer;
   }
   .filter-toggle-btn.active{ background:var(--accent); color:#0B1013; border-color:var(--accent); }
+  .board-table td.creador-cell, .board-table td.asignado-cell{ font-size:13px; color:var(--text-dim); white-space:nowrap; }
 </style>
 </head>
 <body>
@@ -482,7 +483,7 @@
       html += '<div class="empty-state"><div class="big">\u2713</div>Sin tareas pendientes en este momento.</div>';
     } else {
       html += '<div class="board-table-wrap"><table class="board-table"><thead><tr>';
-      html += '<th class="col-bar"></th><th>Prioridad</th><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Detalle</th><th>Estado</th><th>Activado</th><th>Acciones</th>';
+      html += '<th class="col-bar"></th><th>Prioridad</th><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Detalle</th><th>Creado por</th><th>Asignado a</th><th>Estado</th><th>Activado</th><th>Acciones</th>';
       html += '</tr></thead><tbody>';
       active.forEach(function(t){
         var dias = daysActive(t);
@@ -492,6 +493,8 @@
         html += '<td class="sector-cell">' + escapeHtml(t.sector) + '</td>';
         html += '<td class="tarea-cell">' + escapeHtml(t.tarea) + '</td>';
         html += '<td class="detalle-cell">' + (t.detalle ? escapeHtml(t.detalle) : '\u2014') + '</td>';
+        html += '<td class="creador-cell">' + (t.creadoPor ? escapeHtml(t.creadoPor) : '\u2014') + '</td>';
+        html += '<td class="asignado-cell">' + (t.asignadoANombre ? escapeHtml(t.asignadoANombre) : 'Todos') + '</td>';
         html += '<td><span class="badge" style="background:' + ESTADO_COLOR[t.estado] + '22; color:' + ESTADO_COLOR[t.estado] + '; border:1px solid ' + ESTADO_COLOR[t.estado] + '">' + t.estado + '</span>' + ((t.estado === 'En curso' && t.iniciadoPor) ? '<div class="mini-attrib">' + escapeHtml(t.iniciadoPor) + '</div>' : '') + '</td>';
         html += '<td class="activado-cell"><div class="activado-fecha mono">' + formatDateTime(t.creado) + '</div><div class="activado-dias">' + dias + (dias === 1 ? ' d\u00eda activo' : ' d\u00edas activo' + (dias===1?'':'s')) + (isEscalated(t) ? " \u23eb" : '') + '</div></td>';
         html += '<td class="actions-cell">';
@@ -509,9 +512,9 @@
     var done = (boardFilterMine && state.currentUser) ? allDone.filter(function(t){ return t.asignadoA === state.currentUser.id; }) : allDone;
     if(done.length){
       html += '<div class="done-strip"><h3>Completadas hoy</h3>';
-      html += '<div class="board-table-wrap"><table class="board-table board-table-compact"><thead><tr><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Finalizado</th><th>Por</th></tr></thead><tbody>';
+      html += '<div class="board-table-wrap"><table class="board-table board-table-compact"><thead><tr><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Asignado a</th><th>Finalizado</th><th>Por</th></tr></thead><tbody>';
       done.slice(0,6).forEach(function(t){
-        html += '<tr><td class="sector-cell">' + escapeHtml(t.sector) + '</td><td class="tarea-cell">' + escapeHtml(t.tarea) + '</td><td class="mono">' + formatDateTime(t.terminadoEn) + '</td><td class="detalle-cell">' + (t.terminadoPor ? escapeHtml(t.terminadoPor) : '') + '</td></tr>';
+        html += '<tr><td class="sector-cell">' + escapeHtml(t.sector) + '</td><td class="tarea-cell">' + escapeHtml(t.tarea) + '</td><td class="asignado-cell">' + (t.asignadoANombre ? escapeHtml(t.asignadoANombre) : 'Todos') + '</td><td class="mono">' + formatDateTime(t.terminadoEn) + '</td><td class="detalle-cell">' + (t.terminadoPor ? escapeHtml(t.terminadoPor) : '') + '</td></tr>';
       });
       html += '</tbody></table></div></div>';
     }
@@ -661,7 +664,8 @@ html += '</div>'; // cierre section-usuarios
       if(t.estado === 'Pausada'){ attrib = ' \u00b7 pausada' + (t.iniciadoPor ? ' (iniciada por ' + escapeHtml(t.iniciadoPor) + ')' : ''); }
       if(t.estado === 'Terminada' && t.terminadoPor){ attrib = ' \u00b7 terminado por ' + escapeHtml(t.terminadoPor); }
       var asigLabel = t.asignadoANombre ? ' \u00b7 asignado a ' + escapeHtml(t.asignadoANombre) : ' \u00b7 sin asignar';
-      html += '  <div class="admin-ticket-info"><div class="t">' + escapeHtml(t.sector) + ' \u2014 ' + escapeHtml(t.tarea) + '</div><div class="s">' + elapsedLabel(t.creado) + (isEscalated(t) ? " \u23eb" : '') + (t.detalle ? ' \u00b7 ' + escapeHtml(t.detalle) : '') + attrib + asigLabel + '</div></div>';
+      var creadorLabel = t.creadoPor ? ' \u00b7 creado por ' + escapeHtml(t.creadoPor) : '';
+      html += '  <div class="admin-ticket-info"><div class="t">' + escapeHtml(t.sector) + ' \u2014 ' + escapeHtml(t.tarea) + '</div><div class="s">' + elapsedLabel(t.creado) + (isEscalated(t) ? " \u23eb" : '') + (t.detalle ? ' \u00b7 ' + escapeHtml(t.detalle) : '') + creadorLabel + attrib + asigLabel + '</div></div>';
       html += '  <div class="admin-controls">';
       if(!isDone){
         html += '    <select data-id="' + t.id + '" data-field="prioridad" class="sel-field">';
