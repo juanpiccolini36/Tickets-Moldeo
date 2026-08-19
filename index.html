@@ -495,7 +495,8 @@
         html += '<td class="detalle-cell">' + (t.detalle ? escapeHtml(t.detalle) : '\u2014') + '</td>';
         html += '<td class="creador-cell">' + (t.creadoPor ? escapeHtml(t.creadoPor) : '\u2014') + '</td>';
         html += '<td class="asignado-cell">' + (t.asignadoANombre ? escapeHtml(t.asignadoANombre) : 'Todos') + '</td>';
-        html += '<td><span class="badge" style="background:' + ESTADO_COLOR[t.estado] + '22; color:' + ESTADO_COLOR[t.estado] + '; border:1px solid ' + ESTADO_COLOR[t.estado] + '">' + t.estado + '</span>' + ((t.estado === 'En curso' && t.iniciadoPor) ? '<div class="mini-attrib">' + escapeHtml(t.iniciadoPor) + '</div>' : '') + '</td>';
+        var estadoTitle = (t.estado === 'En curso' && t.iniciadoPor) ? ' title="Iniciado por ' + escapeHtml(t.iniciadoPor) + '"' : '';
+        html += '<td><span class="badge"' + estadoTitle + ' style="background:' + ESTADO_COLOR[t.estado] + '22; color:' + ESTADO_COLOR[t.estado] + '; border:1px solid ' + ESTADO_COLOR[t.estado] + '">' + t.estado + '</span></td>';
         html += '<td class="activado-cell"><div class="activado-fecha mono">' + formatDateTime(t.creado) + '</div><div class="activado-dias">' + dias + (dias === 1 ? ' d\u00eda activo' : ' d\u00edas activo' + (dias===1?'':'s')) + (isEscalated(t) ? " \u23eb" : '') + '</div></td>';
         html += '<td class="actions-cell">';
         if(t.estado === 'Pendiente'){ html += '<button class="board-btn board-btn-start" data-action="iniciar" data-id="' + t.id + '">Comenzar</button>'; }
