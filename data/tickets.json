@@ -109,5 +109,17 @@
     "terminadoPor": "Diego Pintos",
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_pausereasontest",
+    "sector": "Matriz 20",
+    "tarea": "Prueba motivo de pausa",
+    "detalle": "",
+    "prioridad": "Media",
+    "estado": "En curso",
+    "creado": 1787235149432,
+    "iniciadoEn": 1787235149432,
+    "iniciadoPor": "Diego Pintos",
+    "asignadoA": null
   }
 ]
