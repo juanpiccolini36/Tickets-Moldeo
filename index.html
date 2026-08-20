@@ -839,7 +839,7 @@
     html += '    <img src="' + LOGO_B64 + '" alt="Logo" class="board-logo">';
     html += '    <div class="board-header-right">';
     html += '      <div class="current-user-badge">' + (state.currentUser ? escapeHtml(state.currentUser.nombre) : '') + '</div>';
-    html += '      <div class="board-nav"><label>Ir a</label><select id="adminNavSelect"><option value="tickets">Tickets</option><option value="usuarios">Usuarios</option></select></div>';
+    html += '      <div class="board-nav"><label>Ir a</label><select id="adminNavSelect"><option value="tickets">Tickets</option><option value="usuarios">Usuarios</option><option value="historial">Historial</option></select></div>';
     html += '      <a href="#" class="logout-link-inline" id="logoutLink">Cerrar sesi\u00f3n</a>';
     html += '    </div>';
     html += '  </div>';
@@ -886,6 +886,12 @@
     html += '  </div>';
 
 html += '</div>'; // cierre section-usuarios
+    html += '<div id="section-historial" style="display:none;">';
+    html += '  <div class="panel">';
+    html += '    <h2>Historial de mis tickets</h2>';
+    html += '    <div id="adminHistorialList"></div>';
+    html += '  </div>';
+    html += '</div>'; // cierre section-historial
     html += '  <div class="toggle-row"><label class="back-link" style="color:var(--text-dim); text-transform:none; letter-spacing:0; font-size:12px;">Cada persona entra con su propio usuario. Los que tengan rol \u00abOperario\u00bb ven directo el tablero; los \u00abSupervisor\u00bb entran a esta pantalla de gesti\u00f3n.</label></div>';
 
     html += '</div>';
@@ -898,6 +904,8 @@ html += '</div>'; // cierre section-usuarios
       var val = this.value;
       document.getElementById('section-tickets').style.display = (val === 'tickets') ? '' : 'none';
       document.getElementById('section-usuarios').style.display = (val === 'usuarios') ? '' : 'none';
+      document.getElementById('section-historial').style.display = (val === 'historial') ? '' : 'none';
+      if(val === 'historial'){ refreshAdminHistorial(); }
     };
     document.getElementById('logoutLink').onclick = function(e){ e.preventDefault(); logout(); };
     adminShellBuilt = true;
@@ -917,6 +925,36 @@ html += '</div>'; // cierre section-usuarios
     if(!adminShellBuilt){ buildAdminShell(); }
     refreshAdminLists();
     refreshUserList();
+    refreshAdminHistorial();
+  }
+
+  function refreshAdminHistorial(){
+    var el = document.getElementById('adminHistorialList');
+    if(!el) return;
+    var miNombre = state.currentUser ? state.currentUser.nombre : '';
+    var mine = state.tickets.filter(function(t){ return t.estado === 'Terminada' && t.creadoPor === miNombre; })
+      .sort(function(a,b){ return b.terminadoEn - a.terminadoEn; });
+    if(mine.length === 0){
+      el.innerHTML = '<div style="color:var(--text-dim); font-size:14px;">Todav\u00eda no gener\u00e1ste tickets completados.</div>';
+      return;
+    }
+    var html = '<div class="board-table-wrap"><table class="board-table"><thead><tr>';
+    html += '<th class="col-bar"></th><th>Prioridad</th><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Detalle</th><th>Asignado a</th><th>Finalizado</th><th>Terminado por</th></tr></thead><tbody>';
+    mine.forEach(function(t){
+      html += '<tr>';
+      html += '<td class="col-bar" style="background:' + PRIORITY_COLOR[t.prioridad] + '"></td>';
+      html += '<td><span class="badge" style="background:' + PRIORITY_COLOR[t.prioridad] + '22; color:' + PRIORITY_COLOR[t.prioridad] + '; border:1px solid ' + PRIORITY_COLOR[t.prioridad] + '">' + t.prioridad + '</span></td>';
+      html += '<td class="sector-cell">' + escapeHtml(t.sector) + '</td>';
+      html += '<td class="tarea-cell" data-ticketid="' + t.id + '">' + escapeHtml(t.tarea) + '</td>';
+      html += '<td class="detalle-cell" data-ticketid="' + t.id + '">' + (t.detalle ? escapeHtml(t.detalle) : '\u2014') + '</td>';
+      html += '<td class="asignado-cell">' + (t.asignadoANombre ? escapeHtml(t.asignadoANombre) : 'Todos') + '</td>';
+      html += '<td class="mono">' + formatDateTime(t.terminadoEn) + '</td>';
+      html += '<td class="creador-cell">' + (t.terminadoPor ? escapeHtml(t.terminadoPor) : '\u2014') + '</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    el.innerHTML = html;
+    wireTicketModalCells(el);
   }
 
   function renderAdminList(containerId, list, isDone){
@@ -950,7 +988,7 @@ html += '</div>'; // cierre section-usuarios
       if(t.estado === 'Terminada' && t.terminadoPor){ attrib = ' \u00b7 terminado por ' + escapeHtml(t.terminadoPor); }
       var asigLabel = t.asignadoANombre ? ' \u00b7 asignado a ' + escapeHtml(t.asignadoANombre) : ' \u00b7 sin asignar';
       var creadorLabel = t.creadoPor ? ' \u00b7 creado por ' + escapeHtml(t.creadoPor) : '';
-      html += '  <div class="admin-ticket-info"><div class="t">' + escapeHtml(t.sector) + ' \u2014 ' + escapeHtml(t.tarea) + '</div><div class="s">' + elapsedLabel(t.creado) + (isEscalated(t) ? " \u23eb" : '') + (t.detalle ? ' \u00b7 ' + escapeHtml(t.detalle) : '') + creadorLabel + attrib + asigLabel + '</div></div>';
+      html += '  <div class="admin-ticket-info" data-ticketid="' + t.id + '" style="cursor:pointer;"><div class="t">' + escapeHtml(t.sector) + ' \u2014 ' + escapeHtml(t.tarea) + '</div><div class="s">' + elapsedLabel(t.creado) + (isEscalated(t) ? " \u23eb" : '') + (t.detalle ? ' \u00b7 ' + escapeHtml(t.detalle) : '') + creadorLabel + attrib + asigLabel + '</div></div>';
       html += '  <div class="admin-controls">';
       if(!isDone){
         html += '    <select data-id="' + t.id + '" data-field="prioridad" class="sel-field">';
@@ -967,6 +1005,7 @@ html += '</div>'; // cierre section-usuarios
     });
     el.innerHTML = html;
 
+    wireTicketModalCells(el);
     el.querySelectorAll('.sel-field').forEach(function(sel){
       sel.onchange = function(){
         var id = sel.getAttribute('data-id');
@@ -1252,6 +1291,7 @@ html += '</div>'; // cierre section-usuarios
   async function adminRefreshFromStorage(){
     await loadTickets();
     refreshAdminLists();
+    refreshAdminHistorial();
   }
 
   async function enterMode(newMode){
