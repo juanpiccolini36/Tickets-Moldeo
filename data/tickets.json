@@ -65,7 +65,7 @@
     "tarea": "Traer palet nº206 y dejarlo en el puesto de trabajo de Matriceria.",
     "detalle": "",
     "prioridad": "Media",
-    "estado": "Pausada",
+    "estado": "En curso",
     "creado": 1787139379038,
     "iniciadoEn": 1787236112399,
     "terminadoEn": null,
@@ -80,7 +80,7 @@
         "pausadoEn": 1787236171636,
         "motivo": "No se encuentra el palet donde indica el sistema. Se frena la busqueda hasta confirmar la posicion.",
         "pausadoPor": "Martin Coronel",
-        "reanudadoEn": null
+        "reanudadoEn": 1787236177051
       }
     ]
   },
