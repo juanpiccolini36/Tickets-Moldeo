@@ -307,6 +307,8 @@
   .count-pill{ cursor:pointer; transition:background 0.12s; }
   .count-pill:hover{ background:rgba(255,255,255,0.04); }
   .priority-summary .count-pill.selected, .status-summary .count-pill.selected{ background:rgba(255,255,255,0.07); }
+  .pause-entry{ padding:6px 0; border-bottom:1px dashed var(--line); font-size:14px; }
+  .pause-entry:last-child{ border-bottom:none; }
 </style>
 </head>
 <body>
@@ -521,6 +523,66 @@
     return d.innerHTML;
   }
 
+  function openPauseReasonModal(id){
+    closeTicketModal();
+    var existing = document.getElementById('pauseModalOverlay');
+    if(existing){ existing.remove(); }
+    var overlay = document.createElement('div');
+    overlay.id = 'pauseModalOverlay';
+    overlay.className = 'modal-overlay';
+    var card = document.createElement('div');
+    card.className = 'modal-card';
+    var html = '';
+    html += '<div class="modal-header"><h2>Motivo de la pausa</h2><button id="pauseModalCloseBtn" class="modal-close">&times;</button></div>';
+    html += '<div class="modal-body">';
+    html += '  <label class="modal-label" style="display:block; margin-bottom:8px;">Describ\u00ed brevemente por qu\u00e9 se pausa esta tarea</label>';
+    html += '  <textarea id="pauseReasonInput" placeholder="Ej: Falta repuesto, esperando otra tarea, etc." rows="4"></textarea>';
+    html += '  <div class="btn-row" style="margin-top:16px;"><button class="btn btn-ghost" id="pauseCancelBtn">Cancelar</button><button class="btn btn-primary" id="pauseConfirmBtn">Confirmar pausa</button></div>';
+    html += '</div>';
+    card.innerHTML = html;
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+    document.getElementById('pauseModalCloseBtn').onclick = function(){ overlay.remove(); };
+    document.getElementById('pauseCancelBtn').onclick = function(){ overlay.remove(); };
+    overlay.onclick = function(e){ if(e.target === overlay){ overlay.remove(); } };
+    document.getElementById('pauseConfirmBtn').onclick = async function(){
+      var motivo = document.getElementById('pauseReasonInput').value.trim();
+      if(!motivo){ alert('Ingres\u00e1 un motivo antes de confirmar.'); return; }
+      var btn = document.getElementById('pauseConfirmBtn');
+      btn.disabled = true; btn.textContent = 'Guardando...';
+      await pausarTicket(id, motivo);
+      overlay.remove();
+    };
+    document.getElementById('pauseReasonInput').focus();
+  }
+
+  async function pausarTicket(id, motivo){
+    await saveTicketsSafely(function(){
+      var t = state.tickets.find(function(x){ return x.id === id; });
+      if(!t) return;
+      t.estado = 'Pausada';
+      t.pausadoEn = Date.now();
+      if(!t.historialPausas){ t.historialPausas = []; }
+      t.historialPausas.push({ pausadoEn: Date.now(), motivo: motivo, pausadoPor: state.currentUser ? state.currentUser.nombre : '', reanudadoEn: null });
+    });
+    if(mode === 'admin'){ refreshAdminLists(); } else { renderBoardSection(); }
+  }
+
+  async function reanudarTicket(id){
+    await saveTicketsSafely(function(){
+      var t = state.tickets.find(function(x){ return x.id === id; });
+      if(!t) return;
+      t.estado = 'En curso';
+      if(!t.iniciadoEn){ t.iniciadoEn = Date.now(); }
+      t.iniciadoPor = state.currentUser ? state.currentUser.nombre : '';
+      if(t.historialPausas && t.historialPausas.length){
+        var last = t.historialPausas[t.historialPausas.length - 1];
+        if(last && !last.reanudadoEn){ last.reanudadoEn = Date.now(); }
+      }
+    });
+    if(mode === 'admin'){ refreshAdminLists(); } else { renderBoardSection(); }
+  }
+
   function closeTicketModal(){
     var existing = document.getElementById('ticketModalOverlay');
     if(existing){ existing.remove(); }
@@ -551,6 +613,13 @@
     }
     if(t.terminadoEn){
       html += '  <div class="modal-row"><span class="modal-label">Finalizado</span><span class="modal-value">' + formatDateTime(t.terminadoEn) + (t.terminadoPor ? ' \u00b7 ' + escapeHtml(t.terminadoPor) : '') + '</span></div>';
+    }
+    if(t.historialPausas && t.historialPausas.length){
+      html += '  <div class="modal-row modal-row-full"><span class="modal-label">Historial de pausas</span><div class="modal-value-block">';
+      t.historialPausas.forEach(function(ps){
+        html += '<div class="pause-entry">' + formatDateTime(ps.pausadoEn) + (ps.reanudadoEn ? ' \u2192 ' + formatDateTime(ps.reanudadoEn) : ' (en curso)') + (ps.motivo ? ' \u2014 ' + escapeHtml(ps.motivo) : '') + (ps.pausadoPor ? ' \u00b7 ' + escapeHtml(ps.pausadoPor) : '') + '</div>';
+      });
+      html += '</div></div>';
     }
     html += '</div>';
     card.innerHTML = html;
@@ -736,8 +805,8 @@
         var id = btn.getAttribute('data-id');
         var action = btn.getAttribute('data-action');
         if(action === 'iniciar'){ updateTicket(id, 'estado', 'En curso'); }
-        else if(action === 'pausar'){ updateTicket(id, 'estado', 'Pausada'); }
-        else if(action === 'reanudar'){ updateTicket(id, 'estado', 'En curso'); }
+        else if(action === 'pausar'){ openPauseReasonModal(id); }
+        else if(action === 'reanudar'){ reanudarTicket(id); }
         else if(action === 'terminar'){ if(confirm('\u00bfMarcar esta tarea como Terminada?')){ updateTicket(id, 'estado', 'Terminada'); } }
       };
     });
