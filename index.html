@@ -523,7 +523,14 @@
     return d.innerHTML;
   }
 
-  function openPauseReasonModal(id){
+  function closeOpenPauseRecord(t){
+    if(t.historialPausas && t.historialPausas.length){
+      var last = t.historialPausas[t.historialPausas.length - 1];
+      if(last && !last.reanudadoEn){ last.reanudadoEn = Date.now(); }
+    }
+  }
+
+  function openPauseReasonModal(id, onCancel){
     closeTicketModal();
     var existing = document.getElementById('pauseModalOverlay');
     if(existing){ existing.remove(); }
@@ -542,9 +549,9 @@
     card.innerHTML = html;
     overlay.appendChild(card);
     document.body.appendChild(overlay);
-    document.getElementById('pauseModalCloseBtn').onclick = function(){ overlay.remove(); };
-    document.getElementById('pauseCancelBtn').onclick = function(){ overlay.remove(); };
-    overlay.onclick = function(e){ if(e.target === overlay){ overlay.remove(); } };
+    document.getElementById('pauseModalCloseBtn').onclick = function(){ overlay.remove(); if(onCancel){ onCancel(); } };
+    document.getElementById('pauseCancelBtn').onclick = function(){ overlay.remove(); if(onCancel){ onCancel(); } };
+    overlay.onclick = function(e){ if(e.target === overlay){ overlay.remove(); if(onCancel){ onCancel(); } } };
     document.getElementById('pauseConfirmBtn').onclick = async function(){
       var motivo = document.getElementById('pauseReasonInput').value.trim();
       if(!motivo){ alert('Ingres\u00e1 un motivo antes de confirmar.'); return; }
@@ -575,10 +582,7 @@
       t.estado = 'En curso';
       if(!t.iniciadoEn){ t.iniciadoEn = Date.now(); }
       t.iniciadoPor = state.currentUser ? state.currentUser.nombre : '';
-      if(t.historialPausas && t.historialPausas.length){
-        var last = t.historialPausas[t.historialPausas.length - 1];
-        if(last && !last.reanudadoEn){ last.reanudadoEn = Date.now(); }
-      }
+      closeOpenPauseRecord(t);
     });
     if(mode === 'admin'){ refreshAdminLists(); } else { renderBoardSection(); }
   }
@@ -962,7 +966,17 @@ html += '</div>'; // cierre section-usuarios
       sel.onchange = function(){
         var id = sel.getAttribute('data-id');
         var field = sel.getAttribute('data-field');
-        updateTicket(id, field, sel.value);
+        var value = sel.value;
+        var t = state.tickets.find(function(x){ return x.id === id; });
+        if(field === 'estado' && value === 'Pausada'){
+          openPauseReasonModal(id, function(){ refreshAdminLists(); });
+          return;
+        }
+        if(field === 'estado' && value === 'En curso' && t && t.estado === 'Pausada'){
+          reanudarTicket(id);
+          return;
+        }
+        updateTicket(id, field, value);
       };
     });
     el.querySelectorAll('[data-edit]').forEach(function(btn){
@@ -1155,7 +1169,9 @@ html += '</div>'; // cierre section-usuarios
     await saveTicketsSafely(function(){
       var t = state.tickets.find(function(x){ return x.id === id; });
       if(!t) return;
+      var salioDePausada = (field === 'estado' && t.estado === 'Pausada' && value !== 'Pausada');
       t[field] = value;
+      if(salioDePausada){ closeOpenPauseRecord(t); }
       if(field === 'estado' && value === 'Terminada'){ t.terminadoEn = Date.now(); t.terminadoPor = state.currentUser ? state.currentUser.nombre : ''; }
       if(field === 'estado' && value === 'En curso'){
         if(!t.iniciadoEn){ t.iniciadoEn = Date.now(); }
