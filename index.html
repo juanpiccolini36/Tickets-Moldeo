@@ -300,11 +300,13 @@
   }
   .status-summary .count-pill{ border-radius:0; background:transparent; border-bottom:1px solid var(--line); margin:0; justify-content:space-between; }
   .status-summary .count-pill:last-child{ border-bottom:none; }
-  .summary-group{ display:flex; flex-direction:column; gap:6px; }
-  .summary-title{
-    font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em;
-    font-weight:700;
+  .summary-card-header{
+    padding:10px 16px; font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em;
+    font-weight:700; border-bottom:1px solid var(--line); background:var(--panel);
   }
+  .count-pill{ cursor:pointer; transition:background 0.12s; }
+  .count-pill:hover{ background:rgba(255,255,255,0.04); }
+  .priority-summary .count-pill.selected, .status-summary .count-pill.selected{ background:rgba(255,255,255,0.07); }
 </style>
 </head>
 <body>
@@ -623,12 +625,15 @@
   function renderBoard(){
     var app = document.getElementById('app');
     var allActive = sortedActive();
-    var active = (boardFilterMine && state.currentUser) ? allActive.filter(function(t){ return t.asignadoA === state.currentUser.id; }) : allActive;
+    var activeForCounts = (boardFilterMine && state.currentUser) ? allActive.filter(function(t){ return t.asignadoA === state.currentUser.id; }) : allActive;
+    var active = activeForCounts;
+    if(boardPriorityFilter){ active = active.filter(function(t){ return t.prioridad === boardPriorityFilter; }); }
+    if(boardStatusFilter){ active = active.filter(function(t){ return t.estado === boardStatusFilter; }); }
     var counts = { 'Urgente':0,'Alta':0,'Media':0,'Baja':0 };
-    active.forEach(function(t){ counts[t.prioridad] = (counts[t.prioridad]||0) + 1; });
-    var totalActivas = active.length;
-    var totalIniciadas = active.filter(function(t){ return t.estado === 'En curso'; }).length;
-    var totalPausadas = active.filter(function(t){ return t.estado === 'Pausada'; }).length;
+    activeForCounts.forEach(function(t){ counts[t.prioridad] = (counts[t.prioridad]||0) + 1; });
+    var totalActivas = activeForCounts.length;
+    var totalIniciadas = activeForCounts.filter(function(t){ return t.estado === 'En curso'; }).length;
+    var totalPausadas = activeForCounts.filter(function(t){ return t.estado === 'Pausada'; }).length;
 
     var html = renderBoardHeader();
     html += '<div class="board-main">';
@@ -636,7 +641,11 @@
 
     html += '<div class="board-table-col">';
     if(active.length === 0){
-      html += '<div class="empty-state"><div class="big">\u2713</div>Sin tareas pendientes en este momento.</div>';
+      if(activeForCounts.length > 0){
+        html += '<div class="empty-state"><div class="big">\u2014</div>No hay tareas que coincidan con el filtro aplicado.</div>';
+      } else {
+        html += '<div class="empty-state"><div class="big">\u2713</div>Sin tareas pendientes en este momento.</div>';
+      }
     } else {
       html += '<div class="board-table-wrap"><table class="board-table"><thead><tr>';
       html += '<th class="col-bar"></th><th>Prioridad</th><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Detalle</th><th>Creado por</th><th>Asignado a</th><th>Estado</th><th>Cargado</th><th>Acciones</th>';
@@ -668,21 +677,21 @@
 
     html += '<div class="board-summary-col">';
     html += '<button id="boardFilterToggle" class="filter-toggle-btn' + (boardFilterMine ? ' active' : '') + '">' + (boardFilterMine ? '\u2713 Solo mis tareas' : 'Ver solo mis tareas') + '</button>';
-    html += '<div class="summary-group">';
-    html += '<div class="summary-title">Prioridad</div>';
     html += '<div class="priority-summary">';
+    html += '<div class="summary-card-header">Prioridad</div>';
     ['Urgente','Alta','Media','Baja'].forEach(function(p){
-      html += '<div class="count-pill"><span style="color:' + PRIORITY_COLOR[p] + '; font-weight:700;">' + p.toUpperCase() + '</span><span class="count-num">' + counts[p] + '</span></div>';
+      var sel = (boardPriorityFilter === p) ? ' selected' : '';
+      html += '<div class="count-pill' + sel + '" data-filter-prioridad="' + p + '"><span style="color:' + PRIORITY_COLOR[p] + '; font-weight:700;">' + p.toUpperCase() + '</span><span class="count-num">' + counts[p] + '</span></div>';
     });
     html += '</div>';
-    html += '</div>';
-    html += '<div class="summary-group">';
-    html += '<div class="summary-title">Estado</div>';
     html += '<div class="status-summary">';
-    html += '<div class="count-pill"><span style="color:var(--text); font-weight:700;">CARGADAS</span><span class="count-num">' + totalActivas + '</span></div>';
-    html += '<div class="count-pill"><span style="color:var(--estado-curso); font-weight:700;">INICIADAS</span><span class="count-num">' + totalIniciadas + '</span></div>';
-    html += '<div class="count-pill"><span style="color:var(--estado-pausada); font-weight:700;">PAUSADAS</span><span class="count-num">' + totalPausadas + '</span></div>';
-    html += '</div>';
+    html += '<div class="summary-card-header">Estado</div>';
+    var selCargadas = (!boardStatusFilter) ? ' selected' : '';
+    var selIniciadas = (boardStatusFilter === 'En curso') ? ' selected' : '';
+    var selPausadas = (boardStatusFilter === 'Pausada') ? ' selected' : '';
+    html += '<div class="count-pill' + selCargadas + '" data-filter-estado=""><span style="color:var(--text); font-weight:700;">CARGADAS</span><span class="count-num">' + totalActivas + '</span></div>';
+    html += '<div class="count-pill' + selIniciadas + '" data-filter-estado="En curso"><span style="color:var(--estado-curso); font-weight:700;">INICIADAS</span><span class="count-num">' + totalIniciadas + '</span></div>';
+    html += '<div class="count-pill' + selPausadas + '" data-filter-estado="Pausada"><span style="color:var(--estado-pausada); font-weight:700;">PAUSADAS</span><span class="count-num">' + totalPausadas + '</span></div>';
     html += '</div>';
     html += '</div>';
 
@@ -706,6 +715,21 @@
     updateSyncNote();
     wireBoardHeader();
     wireTicketModalCells(app);
+    app.querySelectorAll('[data-filter-prioridad]').forEach(function(el){
+      el.onclick = function(){
+        var val = el.getAttribute('data-filter-prioridad');
+        boardPriorityFilter = (boardPriorityFilter === val) ? null : val;
+        renderBoard();
+      };
+    });
+    app.querySelectorAll('[data-filter-estado]').forEach(function(el){
+      el.onclick = function(){
+        var val = el.getAttribute('data-filter-estado');
+        if(val === ''){ boardStatusFilter = null; }
+        else { boardStatusFilter = (boardStatusFilter === val) ? null : val; }
+        renderBoard();
+      };
+    });
     document.getElementById('boardFilterToggle').onclick = function(){ boardFilterMine = !boardFilterMine; renderBoard(); };
     app.querySelectorAll('.board-btn').forEach(function(btn){
       btn.onclick = function(){
@@ -731,6 +755,8 @@
   var editingUserId = null;
   var boardFilterMine = false;
   var boardSection = 'tablero';
+  var boardPriorityFilter = null;
+  var boardStatusFilter = null;
 
   function buildAdminShell(){
     var app = document.getElementById('app');
