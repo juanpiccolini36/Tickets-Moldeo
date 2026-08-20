@@ -55,12 +55,11 @@
     border-bottom:1px solid var(--line);
   }
   .count-pill{
-    display:flex; align-items:center; gap:8px;
-    padding:8px 16px; border-radius:8px; background:var(--panel-2);
-    font-size:15px; font-weight:600;
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    padding:9px 16px; border-radius:8px; background:var(--panel-2);
+    font-size:14px; font-weight:400;
   }
-  .count-pill .sw{ width:10px; height:10px; border-radius:2px; }
-  .count-num{ font-size:18px; }
+  .count-num{ font-size:14px; font-weight:700; color:var(--text); }
 
   /* ---------- BOARD LIST ---------- */
   .board-main{ padding:20px 28px 40px; }
@@ -673,16 +672,16 @@
     html += '<div class="summary-title">Prioridad</div>';
     html += '<div class="priority-summary">';
     ['Urgente','Alta','Media','Baja'].forEach(function(p){
-      html += '<div class="count-pill"><span class="sw" style="background:' + PRIORITY_COLOR[p] + '"></span>' + p.toUpperCase() + ' <span class="count-num mono">' + counts[p] + '</span></div>';
+      html += '<div class="count-pill"><span style="color:' + PRIORITY_COLOR[p] + '; font-weight:700;">' + p.toUpperCase() + '</span><span class="count-num">' + counts[p] + '</span></div>';
     });
     html += '</div>';
     html += '</div>';
     html += '<div class="summary-group">';
     html += '<div class="summary-title">Estado</div>';
     html += '<div class="status-summary">';
-    html += '<div class="count-pill"><span class="sw" style="background:var(--accent)"></span>CARGADAS <span class="count-num mono">' + totalActivas + '</span></div>';
-    html += '<div class="count-pill"><span class="sw" style="background:var(--estado-curso)"></span>INICIADAS <span class="count-num mono">' + totalIniciadas + '</span></div>';
-    html += '<div class="count-pill"><span class="sw" style="background:var(--estado-pausada)"></span>PAUSADAS <span class="count-num mono">' + totalPausadas + '</span></div>';
+    html += '<div class="count-pill"><span style="color:var(--text); font-weight:700;">CARGADAS</span><span class="count-num">' + totalActivas + '</span></div>';
+    html += '<div class="count-pill"><span style="color:var(--estado-curso); font-weight:700;">INICIADAS</span><span class="count-num">' + totalIniciadas + '</span></div>';
+    html += '<div class="count-pill"><span style="color:var(--estado-pausada); font-weight:700;">PAUSADAS</span><span class="count-num">' + totalPausadas + '</span></div>';
     html += '</div>';
     html += '</div>';
     html += '</div>';
