@@ -221,8 +221,9 @@
   .board-table td.col-bar{ width:6px; padding:0; }
   .board-table th.col-bar{ width:6px; padding:0; background:transparent; border-bottom:none; }
   .board-table td.sector-cell{ font-size:14px; color:var(--text-dim); white-space:nowrap; }
-  .board-table td.tarea-cell{ font-weight:400; }
-  .board-table td.detalle-cell{ color:var(--text-dim); font-size:14px; max-width:260px; }
+  .board-table td.tarea-cell{ font-weight:400; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:260px; cursor:pointer; }
+  .board-table td.tarea-cell:hover, .board-table td.detalle-cell:hover{ text-decoration:underline; }
+  .board-table td.detalle-cell{ color:var(--text-dim); font-size:14px; max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
   .board-table td.tiempo-cell{ font-size:14px; white-space:nowrap; font-family:inherit; }
   .board-table td.actions-cell{ white-space:nowrap; text-align:right; }
   .board-table .mini-attrib{ font-size:12px; color:var(--text-dim); margin-top:3px; }
@@ -265,6 +266,28 @@
     border-radius:0; background:transparent; border-right:1px solid var(--line); margin:0;
   }
   .priority-summary .count-pill:last-child{ border-right:none; }
+  .current-user-badge{
+    font-size:14px; font-weight:600; color:var(--text); padding:8px 14px;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:6px; white-space:nowrap;
+  }
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,0.65); display:flex; align-items:center; justify-content:center;
+    z-index:1000; padding:20px;
+  }
+  .modal-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px; max-width:600px; width:100%;
+    max-height:85vh; overflow-y:auto; padding:24px;
+  }
+  .modal-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+  .modal-header h2{ margin:0; font-size:19px; }
+  .modal-close{ background:transparent; border:none; color:var(--text-dim); font-size:26px; cursor:pointer; line-height:1; padding:2px 8px; }
+  .modal-close:hover{ color:var(--text); }
+  .modal-row{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding:11px 0; border-bottom:1px solid var(--line); }
+  .modal-row:last-child{ border-bottom:none; }
+  .modal-row-full{ flex-direction:column; align-items:stretch; gap:6px; }
+  .modal-label{ font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; white-space:nowrap; }
+  .modal-value{ text-align:right; }
+  .modal-value-block{ background:var(--panel-2); border-radius:8px; padding:12px 14px; line-height:1.5; white-space:pre-wrap; }
 </style>
 </head>
 <body>
@@ -453,7 +476,7 @@
 
   function formatDateTime(ts){
     var d = new Date(ts);
-    var datePart = d.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit' });
+    var datePart = d.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'2-digit' });
     var timePart = d.toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' });
     return datePart + ' ' + timePart;
   }
@@ -479,11 +502,57 @@
     return d.innerHTML;
   }
 
+  function closeTicketModal(){
+    var existing = document.getElementById('ticketModalOverlay');
+    if(existing){ existing.remove(); }
+  }
+
+  function openTicketModal(id){
+    var t = state.tickets.find(function(x){ return x.id === id; });
+    if(!t) return;
+    closeTicketModal();
+    var overlay = document.createElement('div');
+    overlay.id = 'ticketModalOverlay';
+    overlay.className = 'modal-overlay';
+    var card = document.createElement('div');
+    card.className = 'modal-card';
+    var html = '';
+    html += '<div class="modal-header"><h2>Orden de trabajo</h2><button id="modalCloseBtn" class="modal-close">&times;</button></div>';
+    html += '<div class="modal-body">';
+    html += '  <div class="modal-row"><span class="modal-label">Sector / M\u00e1quina</span><span class="modal-value">' + escapeHtml(t.sector) + '</span></div>';
+    html += '  <div class="modal-row"><span class="modal-label">Prioridad</span><span class="modal-value"><span class="badge" style="background:' + PRIORITY_COLOR[t.prioridad] + '22; color:' + PRIORITY_COLOR[t.prioridad] + '; border:1px solid ' + PRIORITY_COLOR[t.prioridad] + '">' + t.prioridad + '</span></span></div>';
+    html += '  <div class="modal-row"><span class="modal-label">Estado</span><span class="modal-value"><span class="badge" style="background:' + ESTADO_COLOR[t.estado] + '22; color:' + ESTADO_COLOR[t.estado] + '; border:1px solid ' + ESTADO_COLOR[t.estado] + '">' + t.estado + '</span></span></div>';
+    html += '  <div class="modal-row modal-row-full"><span class="modal-label">Tarea</span><div class="modal-value-block">' + escapeHtml(t.tarea) + '</div></div>';
+    html += '  <div class="modal-row modal-row-full"><span class="modal-label">Detalle</span><div class="modal-value-block">' + (t.detalle ? escapeHtml(t.detalle) : 'Sin detalle.') + '</div></div>';
+    html += '  <div class="modal-row"><span class="modal-label">Creado por</span><span class="modal-value">' + (t.creadoPor ? escapeHtml(t.creadoPor) : '\u2014') + '</span></div>';
+    html += '  <div class="modal-row"><span class="modal-label">Asignado a</span><span class="modal-value">' + (t.asignadoANombre ? escapeHtml(t.asignadoANombre) : 'Todos') + '</span></div>';
+    html += '  <div class="modal-row"><span class="modal-label">Activado</span><span class="modal-value">' + formatDateTime(t.creado) + '</span></div>';
+    if(t.iniciadoEn){
+      html += '  <div class="modal-row"><span class="modal-label">Iniciado</span><span class="modal-value">' + formatDateTime(t.iniciadoEn) + (t.iniciadoPor ? ' \u00b7 ' + escapeHtml(t.iniciadoPor) : '') + '</span></div>';
+    }
+    if(t.terminadoEn){
+      html += '  <div class="modal-row"><span class="modal-label">Finalizado</span><span class="modal-value">' + formatDateTime(t.terminadoEn) + (t.terminadoPor ? ' \u00b7 ' + escapeHtml(t.terminadoPor) : '') + '</span></div>';
+    }
+    html += '</div>';
+    card.innerHTML = html;
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+    document.getElementById('modalCloseBtn').onclick = closeTicketModal;
+    overlay.onclick = function(e){ if(e.target === overlay){ closeTicketModal(); } };
+  }
+
+  function wireTicketModalCells(container){
+    container.querySelectorAll('[data-ticketid]').forEach(function(td){
+      td.onclick = function(){ openTicketModal(td.getAttribute('data-ticketid')); };
+    });
+  }
+
   function renderBoardHeader(){
     var html = '';
     html += '<div class="board-header">';
     html += '  <img src="' + LOGO_B64 + '" alt="Logo" class="board-logo">';
     html += '  <div class="board-header-right">';
+    html += '    <div class="current-user-badge">' + (state.currentUser ? escapeHtml(state.currentUser.nombre) : '') + '</div>';
     html += '    <div class="board-nav"><label>Ir a</label><select id="boardNavSelect"><option value="tablero"' + (boardSection==='tablero'?' selected':'') + '>Tablero</option><option value="historial"' + (boardSection==='historial'?' selected':'') + '>Historial</option></select></div>';
     html += '    <a href="#" class="logout-link-inline" id="logoutLink">Cerrar sesi\u00f3n</a>';
     html += '  </div>';
@@ -517,8 +586,8 @@
         html += '<td class="col-bar" style="background:' + PRIORITY_COLOR[t.prioridad] + '"></td>';
         html += '<td><span class="badge" style="background:' + PRIORITY_COLOR[t.prioridad] + '22; color:' + PRIORITY_COLOR[t.prioridad] + '; border:1px solid ' + PRIORITY_COLOR[t.prioridad] + '">' + t.prioridad + '</span></td>';
         html += '<td class="sector-cell">' + escapeHtml(t.sector) + '</td>';
-        html += '<td class="tarea-cell">' + escapeHtml(t.tarea) + '</td>';
-        html += '<td class="detalle-cell">' + (t.detalle ? escapeHtml(t.detalle) : '\u2014') + '</td>';
+        html += '<td class="tarea-cell" data-ticketid="' + t.id + '">' + escapeHtml(t.tarea) + '</td>';
+        html += '<td class="detalle-cell" data-ticketid="' + t.id + '">' + (t.detalle ? escapeHtml(t.detalle) : '\u2014') + '</td>';
         html += '<td class="creador-cell">' + (t.creadoPor ? escapeHtml(t.creadoPor) : '\u2014') + '</td>';
         html += '<td class="asignado-cell">' + (t.asignadoANombre ? escapeHtml(t.asignadoANombre) : 'Todos') + '</td>';
         html += '<td class="mono">' + formatDateTime(t.terminadoEn) + '</td>';
@@ -531,6 +600,7 @@
 
     app.innerHTML = html;
     wireBoardHeader();
+    wireTicketModalCells(app);
   }
 
   function renderBoard(){
@@ -563,8 +633,8 @@
         html += '<td class="col-bar" style="background:' + PRIORITY_COLOR[t.prioridad] + '"></td>';
         html += '<td><span class="badge" style="background:' + PRIORITY_COLOR[t.prioridad] + '22; color:' + PRIORITY_COLOR[t.prioridad] + '; border:1px solid ' + PRIORITY_COLOR[t.prioridad] + '">' + t.prioridad + '</span></td>';
         html += '<td class="sector-cell">' + escapeHtml(t.sector) + '</td>';
-        html += '<td class="tarea-cell">' + escapeHtml(t.tarea) + '</td>';
-        html += '<td class="detalle-cell">' + (t.detalle ? escapeHtml(t.detalle) : '\u2014') + '</td>';
+        html += '<td class="tarea-cell" data-ticketid="' + t.id + '">' + escapeHtml(t.tarea) + '</td>';
+        html += '<td class="detalle-cell" data-ticketid="' + t.id + '">' + (t.detalle ? escapeHtml(t.detalle) : '\u2014') + '</td>';
         html += '<td class="creador-cell">' + (t.creadoPor ? escapeHtml(t.creadoPor) : '\u2014') + '</td>';
         html += '<td class="asignado-cell">' + (t.asignadoANombre ? escapeHtml(t.asignadoANombre) : 'Todos') + '</td>';
         var estadoTitle = (t.estado === 'En curso' && t.iniciadoPor) ? ' title="Iniciado por ' + escapeHtml(t.iniciadoPor) + '"' : '';
@@ -587,7 +657,7 @@
       html += '<div class="done-strip"><h3>Completadas hoy</h3>';
       html += '<div class="board-table-wrap"><table class="board-table board-table-compact"><thead><tr><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Asignado a</th><th>Finalizado</th><th>Por</th></tr></thead><tbody>';
       done.slice(0,6).forEach(function(t){
-        html += '<tr><td class="sector-cell">' + escapeHtml(t.sector) + '</td><td class="tarea-cell">' + escapeHtml(t.tarea) + '</td><td class="asignado-cell">' + (t.asignadoANombre ? escapeHtml(t.asignadoANombre) : 'Todos') + '</td><td class="mono">' + formatDateTime(t.terminadoEn) + '</td><td class="detalle-cell">' + (t.terminadoPor ? escapeHtml(t.terminadoPor) : '') + '</td></tr>';
+        html += '<tr><td class="sector-cell">' + escapeHtml(t.sector) + '</td><td class="tarea-cell" data-ticketid="' + t.id + '">' + escapeHtml(t.tarea) + '</td><td class="asignado-cell">' + (t.asignadoANombre ? escapeHtml(t.asignadoANombre) : 'Todos') + '</td><td class="mono">' + formatDateTime(t.terminadoEn) + '</td><td class="detalle-cell">' + (t.terminadoPor ? escapeHtml(t.terminadoPor) : '') + '</td></tr>';
       });
       html += '</tbody></table></div></div>';
     }
@@ -598,6 +668,7 @@
     app.innerHTML = html;
     updateSyncNote();
     wireBoardHeader();
+    wireTicketModalCells(app);
     document.getElementById('boardFilterToggle').onclick = function(){ boardFilterMine = !boardFilterMine; renderBoard(); };
     app.querySelectorAll('.board-btn').forEach(function(btn){
       btn.onclick = function(){
