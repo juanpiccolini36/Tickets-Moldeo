@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>Tablero de Tickets — Sector Moldeo</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
   :root{
     --bg:#15191D;
     --panel:#1E242A;
@@ -27,7 +28,7 @@
   body{
     background:var(--bg);
     color:var(--text);
-    font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+    font-family:'Nunito',-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
     min-height:100vh;
   }
   .mono{ font-family:'Consolas','SF Mono',Menlo,monospace; letter-spacing:0.02em; }
@@ -214,22 +215,21 @@
     color:var(--text-dim); background:var(--panel-2); border-bottom:1px solid var(--line); white-space:nowrap;
   }
   .board-table td{
-    padding:14px 16px; border-bottom:1px solid var(--line); font-size:16px; vertical-align:middle;
+    padding:14px 16px; border-bottom:1px solid var(--line); font-size:14px; font-weight:400; vertical-align:middle;
   }
   .board-table tbody tr:last-child td{ border-bottom:none; }
   .board-table td.col-bar{ width:6px; padding:0; }
   .board-table th.col-bar{ width:6px; padding:0; background:transparent; border-bottom:none; }
-  .board-table td.sector-cell{ font-size:13px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.04em; white-space:nowrap; }
-  .board-table td.tarea-cell{ font-weight:700; }
+  .board-table td.sector-cell{ font-size:14px; color:var(--text-dim); white-space:nowrap; }
+  .board-table td.tarea-cell{ font-weight:400; }
   .board-table td.detalle-cell{ color:var(--text-dim); font-size:14px; max-width:260px; }
-  .board-table td.tiempo-cell{ font-size:13px; white-space:nowrap; }
+  .board-table td.tiempo-cell{ font-size:14px; white-space:nowrap; font-family:inherit; }
   .board-table td.actions-cell{ white-space:nowrap; text-align:right; }
   .board-table .mini-attrib{ font-size:12px; color:var(--text-dim); margin-top:3px; }
-  .board-table-compact td{ padding:10px 16px; font-size:14px; }
-  .board-table-compact .tarea-cell{ font-weight:600; }
+  .board-table-compact td{ padding:10px 16px; font-size:14px; font-weight:400; }
   .activado-cell{ white-space:nowrap; }
-  .activado-fecha{ font-size:14px; }
-  .activado-dias{ font-size:12px; color:var(--text-dim); margin-top:2px; }
+  .activado-fecha{ font-size:14px; font-family:inherit; letter-spacing:normal; }
+  .activado-dias{ font-size:14px; color:var(--text-dim); margin-top:2px; }
   .board-btn-pause{ background:var(--estado-pausada); color:#0B1013; }
   .board-btn-pause:active{ background:#E8B65C; }
   .board-btn-resume{ background:var(--accent); color:#0B1013; }
@@ -241,7 +241,7 @@
     text-transform:uppercase; letter-spacing:0.03em; cursor:pointer;
   }
   .filter-toggle-btn.active{ background:var(--accent); color:#0B1013; border-color:var(--accent); }
-  .board-table td.creador-cell, .board-table td.asignado-cell{ font-size:13px; color:var(--text-dim); white-space:nowrap; }
+  .board-table td.creador-cell, .board-table td.asignado-cell{ font-size:14px; color:var(--text-dim); white-space:nowrap; }
   .board-logo{ height:42px; width:auto; display:block; border-radius:6px; }
   .board-header-right{ display:flex; align-items:center; gap:14px; }
   .board-nav{ display:flex; align-items:center; gap:8px; }
