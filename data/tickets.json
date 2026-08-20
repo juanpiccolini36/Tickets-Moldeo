@@ -117,5 +117,17 @@
     "terminadoPor": "Diego Pintos",
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_admintest",
+    "sector": "Matriz 30",
+    "tarea": "Prueba pausa desde gestion",
+    "detalle": "",
+    "prioridad": "Media",
+    "estado": "En curso",
+    "creado": 1787261652194,
+    "iniciadoEn": 1787261652194,
+    "iniciadoPor": "Juan Piccolini",
+    "asignadoA": null
   }
 ]
