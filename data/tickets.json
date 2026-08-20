@@ -117,26 +117,5 @@
     "terminadoPor": "Diego Pintos",
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
-  },
-  {
-    "id": "tk_admintest",
-    "sector": "Matriz 30",
-    "tarea": "Prueba pausa desde gestion",
-    "detalle": "",
-    "prioridad": "Media",
-    "estado": "Pausada",
-    "creado": 1787261652194,
-    "iniciadoEn": 1787261652194,
-    "iniciadoPor": "Juan Piccolini",
-    "asignadoA": null,
-    "pausadoEn": 1787261722805,
-    "historialPausas": [
-      {
-        "pausadoEn": 1787261722805,
-        "motivo": "Prueba desde gestion - falla de matriz detectada",
-        "pausadoPor": "Juan Piccolini",
-        "reanudadoEn": null
-      }
-    ]
   }
 ]
