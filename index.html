@@ -835,8 +835,14 @@
     var app = document.getElementById('app');
     var html = '';
     html += '<div class="admin-wrap">';
-    html += '  <div class="admin-header"><h1 class="display">Gestión de tickets — Moldeo</h1>' +
-      '<div class="admin-nav"><label>Ir a</label><select id="adminNavSelect"><option value="tickets">Tickets</option><option value="usuarios">Usuarios</option></select></div></div>';
+    html += '  <div class="board-header">';
+    html += '    <img src="' + LOGO_B64 + '" alt="Logo" class="board-logo">';
+    html += '    <div class="board-header-right">';
+    html += '      <div class="current-user-badge">' + (state.currentUser ? escapeHtml(state.currentUser.nombre) : '') + '</div>';
+    html += '      <div class="board-nav"><label>Ir a</label><select id="adminNavSelect"><option value="tickets">Tickets</option><option value="usuarios">Usuarios</option></select></div>';
+    html += '      <a href="#" class="logout-link-inline" id="logoutLink">Cerrar sesi\u00f3n</a>';
+    html += '    </div>';
+    html += '  </div>';
 
     html += '<div id="section-tickets">';
     html += '  <div class="panel">';
