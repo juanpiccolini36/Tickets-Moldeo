@@ -116,7 +116,7 @@
     "tarea": "Prueba motivo de pausa",
     "detalle": "",
     "prioridad": "Media",
-    "estado": "Pausada",
+    "estado": "En curso",
     "creado": 1787235149432,
     "iniciadoEn": 1787235149432,
     "iniciadoPor": "Diego Pintos",
@@ -127,7 +127,7 @@
         "pausadoEn": 1787235240911,
         "motivo": "Falta repuesto - extractor roto, esperando pieza de almacén",
         "pausadoPor": "Diego Pintos",
-        "reanudadoEn": null
+        "reanudadoEn": 1787235311601
       }
     ]
   }
