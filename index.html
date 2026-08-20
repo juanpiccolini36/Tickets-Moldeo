@@ -215,7 +215,7 @@
     color:var(--text-dim); background:var(--panel-2); border-bottom:1px solid var(--line); white-space:nowrap;
   }
   .board-table td{
-    padding:14px 16px; border-bottom:1px solid var(--line); font-size:14px; font-weight:400; vertical-align:middle;
+    padding:11px 14px; border-bottom:1px solid var(--line); font-size:14px; font-weight:400; vertical-align:middle;
   }
   .board-table tbody tr:last-child td{ border-bottom:none; }
   .board-table td.col-bar{ width:6px; padding:0; }
@@ -288,6 +288,19 @@
   .modal-label{ font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; white-space:nowrap; }
   .modal-value{ text-align:right; }
   .modal-value-block{ background:var(--panel-2); border-radius:8px; padding:12px 14px; line-height:1.5; white-space:pre-wrap; }
+  .board-content-row{ display:flex; gap:16px; align-items:flex-start; }
+  .board-table-col{ flex:1; min-width:0; }
+  .board-summary-col{ width:210px; flex-shrink:0; display:flex; flex-direction:column; gap:14px; }
+  .board-summary-col .filter-toggle-btn{ width:100%; text-align:center; }
+  .priority-summary{ flex-direction:column; }
+  .priority-summary .count-pill{ border-right:none; border-bottom:1px solid var(--line); justify-content:space-between; }
+  .priority-summary .count-pill:last-child{ border-bottom:none; }
+  .status-summary{
+    display:flex; flex-direction:column; border:1px solid var(--line); border-radius:8px;
+    overflow:hidden; background:var(--panel-2);
+  }
+  .status-summary .count-pill{ border-radius:0; background:transparent; border-bottom:1px solid var(--line); margin:0; justify-content:space-between; }
+  .status-summary .count-pill:last-child{ border-bottom:none; }
 </style>
 </head>
 <body>
@@ -609,18 +622,15 @@
     var active = (boardFilterMine && state.currentUser) ? allActive.filter(function(t){ return t.asignadoA === state.currentUser.id; }) : allActive;
     var counts = { 'Urgente':0,'Alta':0,'Media':0,'Baja':0 };
     active.forEach(function(t){ counts[t.prioridad] = (counts[t.prioridad]||0) + 1; });
+    var totalActivas = active.length;
+    var totalIniciadas = active.filter(function(t){ return t.estado === 'En curso'; }).length;
+    var totalPausadas = active.filter(function(t){ return t.estado === 'Pausada'; }).length;
 
     var html = renderBoardHeader();
-    html += '<div class="counts-strip">';
-    html += '<div class="priority-summary">';
-    ['Urgente','Alta','Media','Baja'].forEach(function(p){
-      html += '<div class="count-pill"><span class="sw" style="background:' + PRIORITY_COLOR[p] + '"></span>' + p.toUpperCase() + ' <span class="count-num mono">' + counts[p] + '</span></div>';
-    });
-    html += '</div>';
-    html += '<button id="boardFilterToggle" class="filter-toggle-btn' + (boardFilterMine ? ' active' : '') + '">' + (boardFilterMine ? '\u2713 Solo mis tareas' : 'Ver solo mis tareas') + '</button>';
-    html += '</div>';
-
     html += '<div class="board-main">';
+    html += '<div class="board-content-row">';
+
+    html += '<div class="board-table-col">';
     if(active.length === 0){
       html += '<div class="empty-state"><div class="big">\u2713</div>Sin tareas pendientes en este momento.</div>';
     } else {
@@ -650,6 +660,23 @@
       });
       html += '</tbody></table></div>';
     }
+    html += '</div>';
+
+    html += '<div class="board-summary-col">';
+    html += '<button id="boardFilterToggle" class="filter-toggle-btn' + (boardFilterMine ? ' active' : '') + '">' + (boardFilterMine ? '\u2713 Solo mis tareas' : 'Ver solo mis tareas') + '</button>';
+    html += '<div class="priority-summary">';
+    ['Urgente','Alta','Media','Baja'].forEach(function(p){
+      html += '<div class="count-pill"><span class="sw" style="background:' + PRIORITY_COLOR[p] + '"></span>' + p.toUpperCase() + ' <span class="count-num mono">' + counts[p] + '</span></div>';
+    });
+    html += '</div>';
+    html += '<div class="status-summary">';
+    html += '<div class="count-pill"><span class="sw" style="background:var(--accent)"></span>ACTIVAS <span class="count-num mono">' + totalActivas + '</span></div>';
+    html += '<div class="count-pill"><span class="sw" style="background:var(--estado-curso)"></span>INICIADAS <span class="count-num mono">' + totalIniciadas + '</span></div>';
+    html += '<div class="count-pill"><span class="sw" style="background:var(--estado-pausada)"></span>PAUSADAS <span class="count-num mono">' + totalPausadas + '</span></div>';
+    html += '</div>';
+    html += '</div>';
+
+    html += '</div>';
 
     var allDone = doneToday();
     var done = (boardFilterMine && state.currentUser) ? allDone.filter(function(t){ return t.asignadoA === state.currentUser.id; }) : allDone;
