@@ -151,5 +151,22 @@
     "terminadoPor": null,
     "asignadoA": "u_mt00jxsx",
     "asignadoANombre": "Martin Coronel"
+  },
+  {
+    "id": "tk_mt34gum46p95g",
+    "sector": "Horno chico",
+    "tarea": "Soldar nuevamente las bisagras traseras de la puerta izquierda.",
+    "detalle": "Consultar con Nicolas antes de hacer el trabajo para ver como reforzar el panel de anclaje.",
+    "prioridad": "Baja",
+    "estado": "Pendiente",
+    "creado": 1787327201020,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Giacosa",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
