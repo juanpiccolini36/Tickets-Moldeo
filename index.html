@@ -127,7 +127,7 @@
   .logout-link:hover{ opacity:1; color:var(--text); border-color:var(--text-dim); }
 
   /* ---------- ADMIN VIEW ---------- */
-  .admin-wrap{ max-width:1400px; margin:0 auto; padding:24px 28px 60px; }
+  .admin-wrap{ max-width:none; margin:0; padding:24px 28px 60px; }
   .admin-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px;}
   .admin-header h1{ font-size:22px; margin:0; }
   .back-link{ color:var(--accent); font-size:13px; text-decoration:none; }
@@ -319,6 +319,9 @@
   .workload-summary-col .count-pill{ padding:7px 12px; font-size:13px; }
   .workload-item{ padding:8px 0; border-bottom:1px dashed var(--line); font-size:14px; }
   .workload-item:last-child{ border-bottom:none; }
+  .collapsible-header{ display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; }
+  .collapsible-header:hover{ color:var(--text); }
+  .collapse-arrow{ font-size:11px; color:var(--text-dim); }
 </style>
 </head>
 <body>
@@ -874,12 +877,12 @@
     html += '  </div>';
     html += '</div>'; // cierre form-row-flex
     html += '  <div class="panel">';
-    html += '    <h2>Tickets activos (<span id="activeCount">0</span>)</h2>';
+    html += '    <h2 id="activeHeader" class="collapsible-header">Tickets activos (<span id="activeCount">0</span>) <span class="collapse-arrow" id="activeArrow">\u25be</span></h2>';
     html += '    <div id="activeList"></div>';
     html += '  </div>';
 
     html += '  <div class="panel">';
-    html += '    <h2>Completadas hoy (<span id="doneCount">0</span>)</h2>';
+    html += '    <h2 id="doneHeader" class="collapsible-header">Completadas hoy (<span id="doneCount">0</span>) <span class="collapse-arrow" id="doneArrow">\u25be</span></h2>';
     html += '    <div id="doneList"></div>';
     html += '  </div>';
 
@@ -916,6 +919,20 @@ html += '</div>'; // cierre section-usuarios
     document.getElementById('btnAdd').onclick = handleAdd;
     document.getElementById('f_asignado').onchange = refreshAsignadoWorkload;
     refreshAssignSelect();
+    document.getElementById('activeHeader').onclick = function(){
+      var el = document.getElementById('activeList');
+      var arrow = document.getElementById('activeArrow');
+      var hidden = el.style.display === 'none';
+      el.style.display = hidden ? '' : 'none';
+      arrow.textContent = hidden ? '\u25be' : '\u25b8';
+    };
+    document.getElementById('doneHeader').onclick = function(){
+      var el = document.getElementById('doneList');
+      var arrow = document.getElementById('doneArrow');
+      var hidden = el.style.display === 'none';
+      el.style.display = hidden ? '' : 'none';
+      arrow.textContent = hidden ? '\u25be' : '\u25b8';
+    };
     document.getElementById('btnAddUser').onclick = handleAddUser;
     document.getElementById('adminNavSelect').onchange = function(){
       var val = this.value;
