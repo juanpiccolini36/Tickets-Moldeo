@@ -312,6 +312,7 @@
   .panel-narrow{ max-width:640px; }
   .form-row-flex{ display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; }
   .form-row-flex > .panel{ flex:1 1 340px; }
+  #workloadPanel{ flex:3 1 500px; }
   .workload-row{ display:flex; gap:16px; align-items:flex-start; }
   .workload-list-col{ flex:1; min-width:0; }
   .workload-summary-col{ width:150px; flex-shrink:0; }
@@ -871,7 +872,7 @@
     html += '    <div class="btn-row"><button class="btn btn-primary" id="btnAdd">Crear ticket</button></div>';
     html += '  </div>';
 
-        html += '  <div class="panel panel-narrow">';
+        html += '  <div class="panel" id="workloadPanel">';
     html += '    <h2>Carga de trabajo</h2>';
     html += '    <div id="asignadoWorkload"><div style="color:var(--text-dim); font-size:14px;">Eleg\u00ed una persona en \u00abAsignado a\u00bb para ver sus tareas activas.</div></div>';
     html += '  </div>';
