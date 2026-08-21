@@ -324,6 +324,11 @@
   .collapsible-header{ display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; }
   .collapsible-header:hover{ color:var(--text); }
   .collapse-arrow{ font-size:11px; color:var(--text-dim); }
+  .admin-edit-grid{ display:grid; grid-template-columns: 1fr 160px 160px; gap:8px; }
+  .admin-edit-grid .edit-tarea, .admin-edit-grid .edit-detalle{ grid-column: 1 / -1; }
+  .admin-edit-grid input, .admin-edit-grid select, .admin-edit-grid textarea{
+    padding:8px 10px; background:var(--panel); border:1px solid var(--line); border-radius:6px; color:var(--text); font-family:inherit; font-size:14px;
+  }
 </style>
 </head>
 <body>
@@ -1000,66 +1005,58 @@ html += '</div>'; // cierre section-usuarios
       el.innerHTML = '<div style="color:var(--text-dim); font-size:14px;">Nada para mostrar.</div>';
       return;
     }
-    var html = '';
+    var html = '<div class="board-table-wrap"><table class="board-table"><thead><tr>';
+    html += '<th class="col-bar"></th><th>Prioridad</th><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Detalle</th><th>Creado por</th><th>Asignado a</th><th>Estado</th><th>Cargado</th>';
+    if(isDone){ html += '<th>Finalizado</th><th>Terminado por</th>'; }
+    html += '<th>Acciones</th>';
+    html += '</tr></thead><tbody>';
     list.forEach(function(t){
+      var dias = daysActive(t);
       if(editingTicketId === t.id){
-        html += '<div class="admin-ticket admin-ticket-editing">';
-        html += '  <div class="bar" style="background:' + PRIORITY_COLOR[t.prioridad] + '"></div>';
-        html += '  <div class="admin-ticket-editform">';
-        html += '    <input type="text" class="edit-sector" value="' + escapeHtml(t.sector) + '" placeholder="Sector / M\u00e1quina">';
-        html += '    <input type="text" class="edit-tarea" value="' + escapeHtml(t.tarea) + '" placeholder="Tarea">';
-        html += '    <textarea class="edit-detalle" placeholder="Detalle (opcional)">' + escapeHtml(t.detalle||'') + '</textarea>';
-        html += '  </div>';
-        html += '  <div class="admin-controls">';
-        html += '    <button class="icon-btn icon-btn-save" data-save="' + t.id + '">Guardar</button>';
-        html += '    <button class="icon-btn" data-cancel="' + t.id + '">Cancelar</button>';
-        html += '  </div>';
+        html += '<tr>';
+        html += '<td class="col-bar" style="background:' + PRIORITY_COLOR[t.prioridad] + '"></td>';
+        html += '<td colspan="' + (isDone ? 11 : 9) + '">';
+        html += '<div class="admin-edit-grid">';
+        html += '  <input type="text" class="edit-sector" value="' + escapeHtml(t.sector) + '" placeholder="Sector / M\u00e1quina">';
+        html += '  <select class="edit-prioridad">';
+        ['Urgente','Alta','Media','Baja'].forEach(function(p){ html += '<option' + (p===t.prioridad?' selected':'') + '>' + p + '</option>'; });
+        html += '  </select>';
+        html += '  <select class="edit-estado">';
+        ['Pendiente','En curso','Pausada','Terminada'].forEach(function(e2){ html += '<option' + (e2===t.estado?' selected':'') + '>' + e2 + '</option>'; });
+        html += '  </select>';
+        html += '  <input type="text" class="edit-tarea" value="' + escapeHtml(t.tarea) + '" placeholder="Tarea">';
+        html += '  <textarea class="edit-detalle" placeholder="Detalle (opcional)">' + escapeHtml(t.detalle||'') + '</textarea>';
         html += '</div>';
+        html += '<div class="btn-row" style="margin-top:10px;"><button class="btn btn-primary" data-save="' + t.id + '">Guardar</button> <button class="btn btn-ghost" data-cancel="' + t.id + '">Cancelar</button></div>';
+        html += '</td>';
+        html += '</tr>';
         return;
       }
-      html += '<div class="admin-ticket">';
-      html += '  <div class="bar" style="background:' + PRIORITY_COLOR[t.prioridad] + '"></div>';
-      var attrib = '';
-      if(t.estado === 'En curso' && t.iniciadoPor){ attrib = ' \u00b7 iniciado por ' + escapeHtml(t.iniciadoPor); }
-      if(t.estado === 'Pausada'){ attrib = ' \u00b7 pausada' + (t.iniciadoPor ? ' (iniciada por ' + escapeHtml(t.iniciadoPor) + ')' : ''); }
-      if(t.estado === 'Terminada' && t.terminadoPor){ attrib = ' \u00b7 terminado por ' + escapeHtml(t.terminadoPor); }
-      var asigLabel = t.asignadoANombre ? ' \u00b7 asignado a ' + escapeHtml(t.asignadoANombre) : ' \u00b7 sin asignar';
-      var creadorLabel = t.creadoPor ? ' \u00b7 creado por ' + escapeHtml(t.creadoPor) : '';
-      html += '  <div class="admin-ticket-info" data-ticketid="' + t.id + '" style="cursor:pointer;"><div class="t">' + escapeHtml(t.sector) + ' \u2014 ' + escapeHtml(t.tarea) + '</div><div class="s">' + elapsedLabel(t.creado) + (isEscalated(t) ? " \u23eb" : '') + (t.detalle ? ' \u00b7 ' + escapeHtml(t.detalle) : '') + creadorLabel + attrib + asigLabel + '</div></div>';
-      html += '  <div class="admin-controls">';
-      if(!isDone){
-        html += '    <select data-id="' + t.id + '" data-field="prioridad" class="sel-field">';
-        ['Urgente','Alta','Media','Baja'].forEach(function(p){ html += '<option' + (p===t.prioridad?' selected':'') + '>' + p + '</option>'; });
-        html += '    </select>';
-        html += '    <select data-id="' + t.id + '" data-field="estado" class="sel-field">';
-        ['Pendiente','En curso','Pausada','Terminada'].forEach(function(e2){ html += '<option' + (e2===t.estado?' selected':'') + '>' + e2 + '</option>'; });
-        html += '    </select>';
+      html += '<tr>';
+      html += '<td class="col-bar" style="background:' + PRIORITY_COLOR[t.prioridad] + '"></td>';
+      html += '<td><span class="badge" style="background:' + PRIORITY_COLOR[t.prioridad] + '22; color:' + PRIORITY_COLOR[t.prioridad] + '; border:1px solid ' + PRIORITY_COLOR[t.prioridad] + '">' + t.prioridad + '</span></td>';
+      html += '<td class="sector-cell">' + escapeHtml(t.sector) + '</td>';
+      html += '<td class="tarea-cell" data-ticketid="' + t.id + '">' + escapeHtml(t.tarea) + '</td>';
+      html += '<td class="detalle-cell" data-ticketid="' + t.id + '">' + (t.detalle ? escapeHtml(t.detalle) : '\u2014') + '</td>';
+      html += '<td class="creador-cell">' + (t.creadoPor ? escapeHtml(t.creadoPor) : '\u2014') + '</td>';
+      html += '<td class="asignado-cell">' + (t.asignadoANombre ? escapeHtml(t.asignadoANombre) : 'Todos') + '</td>';
+      var estadoTitle = (t.estado === 'En curso' && t.iniciadoPor) ? ' title="Iniciado por ' + escapeHtml(t.iniciadoPor) + '"' : '';
+      html += '<td><span class="badge"' + estadoTitle + ' style="background:' + ESTADO_COLOR[t.estado] + '22; color:' + ESTADO_COLOR[t.estado] + '; border:1px solid ' + ESTADO_COLOR[t.estado] + '">' + t.estado + '</span></td>';
+      html += '<td class="activado-cell"><div class="activado-fecha mono">' + formatDateTime(t.creado) + '</div><div class="activado-dias">' + dias + (dias === 1 ? ' d\u00eda cargado' : ' d\u00edas cargado' + (dias===1?'':'s')) + (isEscalated(t) ? " \u23eb" : '') + '</div></td>';
+      if(isDone){
+        html += '<td class="mono">' + (t.terminadoEn ? formatDateTime(t.terminadoEn) : '\u2014') + '</td>';
+        html += '<td class="creador-cell">' + (t.terminadoPor ? escapeHtml(t.terminadoPor) : '\u2014') + '</td>';
       }
-      html += '    <button class="icon-btn" data-edit="' + t.id + '">Editar</button>';
-      html += '    <button class="icon-btn" data-del="' + t.id + '">Eliminar</button>';
-      html += '  </div>';
-      html += '</div>';
+      html += '<td class="actions-cell">';
+      html += '<button class="icon-btn" data-edit="' + t.id + '">Editar</button>';
+      html += '<button class="icon-btn" data-del="' + t.id + '">Eliminar</button>';
+      html += '</td>';
+      html += '</tr>';
     });
+    html += '</tbody></table></div>';
     el.innerHTML = html;
 
     wireTicketModalCells(el);
-    el.querySelectorAll('.sel-field').forEach(function(sel){
-      sel.onchange = function(){
-        var id = sel.getAttribute('data-id');
-        var field = sel.getAttribute('data-field');
-        var value = sel.value;
-        var t = state.tickets.find(function(x){ return x.id === id; });
-        if(field === 'estado' && value === 'Pausada'){
-          openPauseReasonModal(id, function(){ refreshAdminLists(); });
-          return;
-        }
-        if(field === 'estado' && value === 'En curso' && t && t.estado === 'Pausada'){
-          reanudarTicket(id);
-          return;
-        }
-        updateTicket(id, field, value);
-      };
-    });
     el.querySelectorAll('[data-edit]').forEach(function(btn){
       btn.onclick = function(){ editingTicketId = btn.getAttribute('data-edit'); refreshAdminLists(); };
     });
@@ -1069,15 +1066,44 @@ html += '</div>'; // cierre section-usuarios
     el.querySelectorAll('[data-save]').forEach(function(btn){
       btn.onclick = async function(){
         var id = btn.getAttribute('data-save');
-        var card = btn.closest('.admin-ticket');
-        var sector = card.querySelector('.edit-sector').value.trim();
-        var tarea = card.querySelector('.edit-tarea').value.trim();
-        var detalle = card.querySelector('.edit-detalle').value.trim();
+        var row = btn.closest('tr');
+        var sector = row.querySelector('.edit-sector').value.trim();
+        var tarea = row.querySelector('.edit-tarea').value.trim();
+        var detalle = row.querySelector('.edit-detalle').value.trim();
+        var nuevaPrioridad = row.querySelector('.edit-prioridad').value;
+        var nuevoEstado = row.querySelector('.edit-estado').value;
         if(!sector || !tarea){ alert('Sector/M\u00e1quina y Tarea no pueden quedar vac\u00edos.'); return; }
+        var tActual = state.tickets.find(function(x){ return x.id === id; });
+        var estadoCambio = tActual && tActual.estado !== nuevoEstado;
         btn.disabled = true; btn.textContent = 'Guardando...';
+
+        if(estadoCambio && nuevoEstado === 'Pausada'){
+          await saveTicketsSafely(function(){
+            var tt = state.tickets.find(function(x){ return x.id === id; });
+            if(tt){ tt.sector = sector; tt.tarea = tarea; tt.detalle = detalle; tt.prioridad = nuevaPrioridad; }
+          });
+          editingTicketId = null;
+          openPauseReasonModal(id);
+          return;
+        }
+
         await saveTicketsSafely(function(){
-          var t = state.tickets.find(function(x){ return x.id === id; });
-          if(t){ t.sector = sector; t.tarea = tarea; t.detalle = detalle; }
+          var tt = state.tickets.find(function(x){ return x.id === id; });
+          if(!tt) return;
+          tt.sector = sector; tt.tarea = tarea; tt.detalle = detalle; tt.prioridad = nuevaPrioridad;
+          if(estadoCambio){
+            tt.estado = nuevoEstado;
+            if(nuevoEstado === 'Terminada'){ tt.terminadoEn = Date.now(); tt.terminadoPor = state.currentUser ? state.currentUser.nombre : ''; }
+            if(nuevoEstado === 'En curso'){
+              if(!tt.iniciadoEn){ tt.iniciadoEn = Date.now(); }
+              tt.iniciadoPor = state.currentUser ? state.currentUser.nombre : '';
+              if(tt.historialPausas && tt.historialPausas.length){
+                var last = tt.historialPausas[tt.historialPausas.length - 1];
+                if(last && !last.reanudadoEn){ last.reanudadoEn = Date.now(); }
+              }
+            }
+            if(nuevoEstado === 'Pendiente'){ tt.terminadoEn = null; }
+          }
         });
         editingTicketId = null;
         refreshAdminLists();
@@ -1093,6 +1119,7 @@ html += '</div>'; // cierre section-usuarios
     });
   }
 
+  
   async function handleAddUser(){
     var nombre = document.getElementById('u_nombre').value.trim();
     var rol = document.getElementById('u_rol').value;
