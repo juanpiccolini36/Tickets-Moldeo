@@ -117,5 +117,22 @@
     "terminadoPor": "Diego Pintos",
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mt32tnoimxpdr",
+    "sector": "Moldeo",
+    "tarea": "Sacar palet nº52 y guardarlo en la estanteria correspondiente.",
+    "detalle": "",
+    "prioridad": "Urgente",
+    "estado": "Pendiente",
+    "creado": 1787324439330,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_mt00jxsx",
+    "asignadoANombre": "Martin Coronel"
   }
 ]
