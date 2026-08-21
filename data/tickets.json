@@ -134,5 +134,22 @@
     "terminadoPor": null,
     "asignadoA": "u_mt00jxsx",
     "asignadoANombre": "Martin Coronel"
+  },
+  {
+    "id": "tk_mt34eg1vlx8zd",
+    "sector": "Poliuretano",
+    "tarea": "Sacar piezas del horno y llevarlas al sector de Pulido.",
+    "detalle": "",
+    "prioridad": "Urgente",
+    "estado": "Pendiente",
+    "creado": 1787327088835,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Giacosa",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_mt00jxsx",
+    "asignadoANombre": "Martin Coronel"
   }
 ]
