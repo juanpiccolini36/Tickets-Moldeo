@@ -1253,7 +1253,7 @@ html += '</div>'; // cierre section-usuarios
     } else {
       html += '<div class="workload-row">';
       html += '  <div class="workload-list-col"><div class="board-table-wrap"><table class="board-table"><thead><tr>';
-      html += '<th class="col-bar"></th><th>Prioridad</th><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Estado</th><th>Creado por</th></tr></thead><tbody>';
+      html += '<th class="col-bar"></th><th>Prioridad</th><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Estado</th><th>Creado por</th><th>Cargado</th></tr></thead><tbody>';
       mine.sort(function(a,b){ return PRIORITY_RANK[b.prioridad] - PRIORITY_RANK[a.prioridad]; }).forEach(function(t){
         html += '<tr>';
         html += '<td class="col-bar" style="background:' + PRIORITY_COLOR[t.prioridad] + '"></td>';
@@ -1262,6 +1262,8 @@ html += '</div>'; // cierre section-usuarios
         html += '<td class="tarea-cell" data-ticketid="' + t.id + '">' + escapeHtml(t.tarea) + '</td>';
         html += '<td><span class="badge" style="background:' + ESTADO_COLOR[t.estado] + '22; color:' + ESTADO_COLOR[t.estado] + '; border:1px solid ' + ESTADO_COLOR[t.estado] + '">' + t.estado + '</span></td>';
         html += '<td class="creador-cell">' + (t.creadoPor ? escapeHtml(t.creadoPor) : '\u2014') + '</td>';
+        var diasW = daysActive(t);
+        html += '<td class="activado-cell"><div class="activado-fecha mono">' + formatDateTime(t.creado) + '</div><div class="activado-dias">' + diasW + (diasW === 1 ? ' d\u00eda cargado' : ' d\u00edas cargado' + (diasW===1?'':'s')) + (isEscalated(t) ? " \u23eb" : '') + '</div></td>';
         html += '</tr>';
       });
       html += '</tbody></table></div></div>';
@@ -1398,6 +1400,7 @@ html += '</div>'; // cierre section-usuarios
   }
 
   async function adminRefreshFromStorage(){
+    if(editingTicketId || editingUserId){ return; }
     await loadTickets();
     refreshAdminLists();
     refreshAdminHistorial();
