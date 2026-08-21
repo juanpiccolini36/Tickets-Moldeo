@@ -127,7 +127,7 @@
   .logout-link:hover{ opacity:1; color:var(--text); border-color:var(--text-dim); }
 
   /* ---------- ADMIN VIEW ---------- */
-  .admin-wrap{ max-width:900px; margin:0 auto; padding:24px 20px 60px; }
+  .admin-wrap{ max-width:1400px; margin:0 auto; padding:24px 28px 60px; }
   .admin-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px;}
   .admin-header h1{ font-size:22px; margin:0; }
   .back-link{ color:var(--accent); font-size:13px; text-decoration:none; }
@@ -309,6 +309,7 @@
   .priority-summary .count-pill.selected, .status-summary .count-pill.selected{ background:rgba(255,255,255,0.07); }
   .pause-entry{ padding:6px 0; border-bottom:1px dashed var(--line); font-size:14px; }
   .pause-entry:last-child{ border-bottom:none; }
+  .panel-narrow{ max-width:640px; }
 </style>
 </head>
 <body>
@@ -834,7 +835,6 @@
   function buildAdminShell(){
     var app = document.getElementById('app');
     var html = '';
-    html += '<div class="admin-wrap">';
     html += '  <div class="board-header">';
     html += '    <img src="' + LOGO_B64 + '" alt="Logo" class="board-logo">';
     html += '    <div class="board-header-right">';
@@ -843,9 +843,10 @@
     html += '      <a href="#" class="logout-link-inline" id="logoutLink">Cerrar sesi\u00f3n</a>';
     html += '    </div>';
     html += '  </div>';
+    html += '<div class="admin-wrap">';
 
     html += '<div id="section-tickets">';
-    html += '  <div class="panel">';
+    html += '  <div class="panel panel-narrow">';
     html += '    <h2>Nuevo ticket</h2>';
     html += '    <div class="form-grid">';
     html += '      <div><label>Sector / Máquina</label><input type="text" id="f_sector" placeholder="Ej: Matriz 12 / Prensa 4"></div>';
@@ -869,7 +870,7 @@
 
         html += '</div>'; // cierre section-tickets
     html += '<div id="section-usuarios" style="display:none;">';
-    html += '  <div class="panel">';
+    html += '  <div class="panel panel-narrow">';
     html += '    <h2>Usuarios</h2>';
     html += '    <div class="form-grid">';
     html += '      <div><label>Nombre</label><input type="text" id="u_nombre" placeholder="Ej: Pedro G\u00f3mez"></div>';
