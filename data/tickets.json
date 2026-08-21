@@ -47,7 +47,7 @@
     "sector": "Poliuretano",
     "tarea": "Traer matriz nº200 al sector y dejarla en espacio D2 de estanteria.",
     "detalle": "",
-    "prioridad": "Baja",
+    "prioridad": "Media",
     "estado": "Pendiente",
     "creado": 1787139315277,
     "iniciadoEn": null,
