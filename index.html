@@ -310,6 +310,10 @@
   .pause-entry{ padding:6px 0; border-bottom:1px dashed var(--line); font-size:14px; }
   .pause-entry:last-child{ border-bottom:none; }
   .panel-narrow{ max-width:640px; }
+  .form-row-flex{ display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; }
+  .form-row-flex > .panel{ flex:1 1 340px; }
+  .workload-item{ padding:8px 0; border-bottom:1px dashed var(--line); font-size:14px; }
+  .workload-item:last-child{ border-bottom:none; }
 </style>
 </head>
 <body>
@@ -846,6 +850,7 @@
     html += '<div class="admin-wrap">';
 
     html += '<div id="section-tickets">';
+    html += '<div class="form-row-flex">';
     html += '  <div class="panel panel-narrow">';
     html += '    <h2>Nuevo ticket</h2>';
     html += '    <div class="form-grid">';
@@ -858,6 +863,11 @@
     html += '    <div class="btn-row"><button class="btn btn-primary" id="btnAdd">Crear ticket</button></div>';
     html += '  </div>';
 
+        html += '  <div class="panel panel-narrow">';
+    html += '    <h2>Carga de trabajo</h2>';
+    html += '    <div id="asignadoWorkload"><div style="color:var(--text-dim); font-size:14px;">Eleg\u00ed una persona en \u00abAsignado a\u00bb para ver sus tareas activas.</div></div>';
+    html += '  </div>';
+    html += '</div>'; // cierre form-row-flex
     html += '  <div class="panel">';
     html += '    <h2>Tickets activos (<span id="activeCount">0</span>)</h2>';
     html += '    <div id="activeList"></div>';
@@ -899,6 +909,7 @@ html += '</div>'; // cierre section-usuarios
     app.innerHTML = html;
 
     document.getElementById('btnAdd').onclick = handleAdd;
+    document.getElementById('f_asignado').onchange = refreshAsignadoWorkload;
     refreshAssignSelect();
     document.getElementById('btnAddUser').onclick = handleAddUser;
     document.getElementById('adminNavSelect').onchange = function(){
@@ -1169,6 +1180,39 @@ html += '</div>'; // cierre section-usuarios
     });
   }
 
+  function refreshAsignadoWorkload(){
+    var container = document.getElementById('asignadoWorkload');
+    if(!container) return;
+    var sel = document.getElementById('f_asignado');
+    var uid = sel ? sel.value : '';
+    if(!uid){
+      container.innerHTML = '<div style="color:var(--text-dim); font-size:14px;">Eleg\u00ed una persona en \u00abAsignado a\u00bb para ver sus tareas activas.</div>';
+      return;
+    }
+    var user = state.users.find(function(u){ return u.id === uid; });
+    var mine = state.tickets.filter(function(t){ return t.asignadoA === uid && t.estado !== 'Terminada'; });
+    var counts = { 'Urgente':0,'Alta':0,'Media':0,'Baja':0 };
+    mine.forEach(function(t){ counts[t.prioridad] = (counts[t.prioridad]||0) + 1; });
+
+    var html = '';
+    html += '<div style="font-weight:700; margin-bottom:12px;">' + (user ? escapeHtml(user.nombre) : '') + ' \u2014 ' + mine.length + (mine.length === 1 ? ' tarea activa' : ' tareas activas') + '</div>';
+    if(mine.length === 0){
+      html += '<div style="color:var(--text-dim); font-size:14px;">Sin tareas activas asignadas por el momento.</div>';
+    } else {
+      html += '<div class="priority-summary" style="margin-bottom:14px;">';
+      ['Urgente','Alta','Media','Baja'].forEach(function(p){
+        html += '<div class="count-pill"><span style="color:' + PRIORITY_COLOR[p] + '; font-weight:700;">' + p.toUpperCase() + '</span><span class="count-num">' + counts[p] + '</span></div>';
+      });
+      html += '</div>';
+      html += '<div class="workload-list">';
+      mine.sort(function(a,b){ return PRIORITY_RANK[b.prioridad] - PRIORITY_RANK[a.prioridad]; }).forEach(function(t){
+        html += '<div class="workload-item"><span class="badge" style="background:' + PRIORITY_COLOR[t.prioridad] + '22; color:' + PRIORITY_COLOR[t.prioridad] + '; border:1px solid ' + PRIORITY_COLOR[t.prioridad] + '">' + t.prioridad + '</span> <b>' + escapeHtml(t.sector) + '</b> \u2014 ' + escapeHtml(t.tarea) + ' <span style="color:var(--text-dim);">(' + t.estado + ')</span></div>';
+      });
+      html += '</div>';
+    }
+    container.innerHTML = html;
+  }
+
   function refreshAssignSelect(){
     var sel = document.getElementById('f_asignado');
     if(!sel) return;
@@ -1208,6 +1252,7 @@ html += '</div>'; // cierre section-usuarios
     document.getElementById('f_asignado').value = '';
     btn.disabled = false; btn.textContent = 'Crear ticket';
     refreshAdminLists();
+    refreshAsignadoWorkload();
   }
 
   async function updateTicket(id, field, value){
@@ -1293,6 +1338,7 @@ html += '</div>'; // cierre section-usuarios
     await loadTickets();
     refreshAdminLists();
     refreshAdminHistorial();
+    refreshAsignadoWorkload();
   }
 
   async function enterMode(newMode){
