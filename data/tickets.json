@@ -149,16 +149,24 @@
     "tarea": "Sacar piezas del horno y llevarlas al sector de Pulido.",
     "detalle": "",
     "prioridad": "Media",
-    "estado": "En curso",
+    "estado": "Pausada",
     "creado": 1787327088835,
     "iniciadoEn": 1787357703945,
     "terminadoEn": null,
-    "pausadoEn": null,
+    "pausadoEn": 1787357710059,
     "creadoPor": "Juan Giacosa",
     "iniciadoPor": "Martin Coronel",
     "terminadoPor": null,
     "asignadoA": "u_mt00jxsx",
-    "asignadoANombre": "Martin Coronel"
+    "asignadoANombre": "Martin Coronel",
+    "historialPausas": [
+      {
+        "pausadoEn": 1787357710059,
+        "motivo": "s",
+        "pausadoPor": "Martin Coronel",
+        "reanudadoEn": null
+      }
+    ]
   },
   {
     "id": "tk_mt34gum46p95g",
