@@ -48,16 +48,24 @@
     "tarea": "Traer matriz nº200 al sector y dejarla en espacio D2 de estanteria.",
     "detalle": "",
     "prioridad": "Baja",
-    "estado": "En curso",
+    "estado": "Pausada",
     "creado": 1787139315277,
     "iniciadoEn": 1787357662580,
     "terminadoEn": null,
-    "pausadoEn": null,
+    "pausadoEn": 1787357680203,
     "creadoPor": "Juan Piccolini",
     "iniciadoPor": "Martin Coronel",
     "terminadoPor": null,
     "asignadoA": "u_mt00jxsx",
-    "asignadoANombre": "Martin Coronel"
+    "asignadoANombre": "Martin Coronel",
+    "historialPausas": [
+      {
+        "pausadoEn": 1787357680203,
+        "motivo": "Falta de ganas",
+        "pausadoPor": "Martin Coronel",
+        "reanudadoEn": null
+      }
+    ]
   },
   {
     "id": "tk_mt00n68usteso",
