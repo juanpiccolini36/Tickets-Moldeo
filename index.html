@@ -900,6 +900,7 @@
   var boardSection = 'tablero';
   var boardPriorityFilter = null;
   var boardStatusFilter = null;
+  var indicadoresLastList = [];
 
   function buildAdminShell(){
     var app = document.getElementById('app');
@@ -1058,8 +1059,9 @@ html += '</div>'; // cierre section-usuarios
     return (hours/24).toFixed(1) + ' d\u00edas';
   }
 
-  function statCard(label, value, sub){
-    var h = '<div class="stat-card">';
+  function statCard(label, value, sub, detailType, detailValue){
+    var attrs = detailType ? ' data-detail="' + detailType + '" data-detail-value="' + escapeHtml(detailValue) + '" style="cursor:pointer;"' : '';
+    var h = '<div class="stat-card"' + attrs + '>';
     h += '<div class="stat-card-value">' + value + '</div>';
     h += '<div class="stat-card-label">' + label + '</div>';
     if(sub){ h += '<div class="stat-card-sub">' + sub + '</div>'; }
@@ -1126,10 +1128,10 @@ html += '</div>'; // cierre section-usuarios
 
     var html = '';
     html += '<div class="indicadores-stats-row">';
-    html += statCard('Cargadas', cargadas);
-    html += statCard('Activas', activas);
-    html += statCard('Pausadas', pausadas);
-    html += statCard('Completadas', completadas);
+    html += statCard('Cargadas', cargadas, null, 'estado', 'cargadas');
+    html += statCard('Activas', activas, null, 'estado', 'activas');
+    html += statCard('Pausadas', pausadas, null, 'estado', 'pausadas');
+    html += statCard('Completadas', completadas, null, 'estado', 'completadas');
     html += '</div>';
 
     html += '<div class="indicadores-stats-row">';
@@ -1140,7 +1142,7 @@ html += '</div>'; // cierre section-usuarios
     html += '<div class="indicadores-cols">';
     html += '  <div class="panel"><h2>Distribuci\u00f3n por prioridad</h2><div class="priority-summary">';
     ['Urgente','Alta','Media','Baja'].forEach(function(p){
-      html += '<div class="count-pill"><span style="color:' + PRIORITY_COLOR[p] + '; font-weight:700;">' + p.toUpperCase() + '</span><span class="count-num">' + prioridadCount[p] + '</span></div>';
+      html += '<div class="count-pill" data-detail="prioridad" data-detail-value="' + p + '"><span style="color:' + PRIORITY_COLOR[p] + '; font-weight:700;">' + p.toUpperCase() + '</span><span class="count-num">' + prioridadCount[p] + '</span></div>';
     });
     html += '  </div></div>';
 
@@ -1150,7 +1152,7 @@ html += '</div>'; // cierre section-usuarios
     } else {
       html += '<div class="priority-summary">';
       sectorTop.forEach(function(s){
-        html += '<div class="count-pill"><span>' + escapeHtml(s.sector) + '</span><span class="count-num">' + s.count + '</span></div>';
+        html += '<div class="count-pill" data-detail="sector" data-detail-value="' + escapeHtml(s.sector) + '"><span>' + escapeHtml(s.sector) + '</span><span class="count-num">' + s.count + '</span></div>';
       });
       html += '</div>';
     }
@@ -1163,13 +1165,75 @@ html += '</div>'; // cierre section-usuarios
     } else {
       html += '<div>';
       motivosTop.forEach(function(m){
-        html += '<div class="workload-item"><span class="count-num" style="margin-right:12px;">' + m.count + '\u00d7</span>' + escapeHtml(m.motivo) + '</div>';
+        html += '<div class="workload-item" data-detail="motivo" data-detail-value="' + escapeHtml(m.motivo) + '" style="cursor:pointer;"><span class="count-num" style="margin-right:12px;">' + m.count + '\u00d7</span>' + escapeHtml(m.motivo) + '</div>';
       });
       html += '</div>';
     }
     html += '</div>';
 
+    html += '<div id="indicadoresDetail"></div>';
+
+    indicadoresLastList = list;
     el.innerHTML = html;
+
+    el.querySelectorAll('[data-detail]').forEach(function(node){
+      node.onclick = function(){
+        renderIndicadorDetail(node.getAttribute('data-detail'), node.getAttribute('data-detail-value'));
+      };
+    });
+  }
+
+  function renderIndicadorDetail(type, value){
+    var el = document.getElementById('indicadoresDetail');
+    if(!el) return;
+    var subset = [];
+    var label = '';
+    if(type === 'estado'){
+      if(value === 'cargadas'){ subset = indicadoresLastList; label = 'Cargadas'; }
+      else if(value === 'activas'){ subset = indicadoresLastList.filter(function(t){ return t.estado === 'Pendiente' || t.estado === 'En curso'; }); label = 'Activas'; }
+      else if(value === 'pausadas'){ subset = indicadoresLastList.filter(function(t){ return t.estado === 'Pausada'; }); label = 'Pausadas'; }
+      else if(value === 'completadas'){ subset = indicadoresLastList.filter(function(t){ return t.estado === 'Terminada'; }); label = 'Completadas'; }
+    } else if(type === 'prioridad'){
+      subset = indicadoresLastList.filter(function(t){ return t.prioridad === value; });
+      label = value;
+    } else if(type === 'sector'){
+      subset = indicadoresLastList.filter(function(t){ return (t.sector || 'Sin sector') === value; });
+      label = value;
+    } else if(type === 'motivo'){
+      subset = indicadoresLastList.filter(function(t){
+        return t.historialPausas && t.historialPausas.some(function(p){ return p.motivo && p.motivo.trim() === value; });
+      });
+      label = 'Motivo: ' + value;
+    }
+
+    var html = '<div class="panel" id="indicadorDetailPanel">';
+    html += '<div class="indicadores-toolbar"><h2>Detalle \u2014 ' + escapeHtml(label) + ' (' + subset.length + ')</h2><button class="icon-btn" id="closeIndicadorDetail">Cerrar</button></div>';
+    if(subset.length === 0){
+      html += '<div style="color:var(--text-dim); font-size:14px;">Sin O.T. para este filtro.</div>';
+    } else {
+      html += '<div class="board-table-wrap"><table class="board-table"><thead><tr>';
+      html += '<th class="col-bar"></th><th>Prioridad</th><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Detalle</th><th>Creado por</th><th>Asignado a</th><th>Estado</th><th>Cargado</th></tr></thead><tbody>';
+      subset.slice().sort(function(a,b){ return b.creado - a.creado; }).forEach(function(t){
+        var dias = daysActive(t);
+        html += '<tr>';
+        html += '<td class="col-bar" style="background:' + PRIORITY_COLOR[t.prioridad] + '"></td>';
+        html += '<td><span class="badge" style="background:' + PRIORITY_COLOR[t.prioridad] + '22; color:' + PRIORITY_COLOR[t.prioridad] + '; border:1px solid ' + PRIORITY_COLOR[t.prioridad] + '">' + t.prioridad + '</span></td>';
+        html += '<td class="sector-cell">' + escapeHtml(t.sector) + '</td>';
+        html += '<td class="tarea-cell" data-ticketid="' + t.id + '">' + escapeHtml(t.tarea) + '</td>';
+        html += '<td class="detalle-cell" data-ticketid="' + t.id + '">' + (t.detalle ? escapeHtml(t.detalle) : '\u2014') + '</td>';
+        html += '<td class="creador-cell">' + (t.creadoPor ? escapeHtml(t.creadoPor) : '\u2014') + '</td>';
+        html += '<td class="asignado-cell">' + (t.asignadoANombre ? escapeHtml(t.asignadoANombre) : 'Todos') + '</td>';
+        html += '<td><span class="badge" style="background:' + ESTADO_COLOR[t.estado] + '22; color:' + ESTADO_COLOR[t.estado] + '; border:1px solid ' + ESTADO_COLOR[t.estado] + '">' + t.estado + '</span></td>';
+        html += '<td class="activado-cell"><div class="activado-fecha mono">' + formatDateTime(t.creado) + '</div><div class="activado-dias">' + dias + (dias === 1 ? ' d\u00eda cargado' : ' d\u00edas cargado' + (dias===1?'':'s')) + '</div></td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table></div>';
+    }
+    html += '</div>';
+    el.innerHTML = html;
+    wireTicketModalCells(el);
+    document.getElementById('closeIndicadorDetail').onclick = function(){ el.innerHTML = ''; };
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function refreshAdminHistorial(){
