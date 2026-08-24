@@ -682,8 +682,9 @@
   function toggleTheme(){
     document.body.classList.toggle('light-theme');
     try{ localStorage.setItem('moldeo_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark'); }catch(e){}
-    var btn = document.getElementById('themeToggle');
-    if(btn){ btn.textContent = document.body.classList.contains('light-theme') ? '\u2600\ufe0f Claro' : '\ud83c\udf19 Oscuro'; }
+    var label = document.body.classList.contains('light-theme') ? '\u2600\ufe0f Claro' : '\ud83c\udf19 Oscuro';
+    var btn1 = document.getElementById('themeToggle'); if(btn1){ btn1.textContent = label; }
+    var btn2 = document.getElementById('adminThemeToggle'); if(btn2){ btn2.textContent = label; }
   }
 
   function renderBoardHeader(){
@@ -897,6 +898,7 @@
     html += '    <div class="board-header-right">';
     html += '      <div class="current-user-badge">' + (state.currentUser ? escapeHtml(state.currentUser.nombre) : '') + '</div>';
     html += '      <div class="board-nav"><label>Ir a</label><select id="adminNavSelect"><option value="tickets">O.T.</option><option value="usuarios">Usuarios</option><option value="historial">Historial</option></select></div>';
+    html += '      <button class="theme-toggle-btn" id="adminThemeToggle">' + (document.body.classList.contains('light-theme') ? '\u2600\ufe0f Claro' : '\ud83c\udf19 Oscuro') + '</button>';
     html += '      <a href="#" class="logout-link-inline" id="logoutLink">Cerrar sesi\u00f3n</a>';
     html += '    </div>';
     html += '  </div>';
@@ -987,6 +989,7 @@ html += '</div>'; // cierre section-usuarios
       if(val === 'historial'){ refreshAdminHistorial(); }
     };
     document.getElementById('logoutLink').onclick = function(e){ e.preventDefault(); logout(); };
+    document.getElementById('adminThemeToggle').onclick = toggleTheme;
     adminShellBuilt = true;
   }
 
