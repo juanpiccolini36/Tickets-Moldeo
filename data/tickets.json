@@ -174,14 +174,14 @@
     "tarea": "Soldar nuevamente las bisagras traseras de la puerta izquierda.",
     "detalle": "Consultar con Nicolas antes de hacer el trabajo para ver como reforzar el panel de anclaje.",
     "prioridad": "Baja",
-    "estado": "En curso",
+    "estado": "Terminada",
     "creado": 1787327201020,
     "iniciadoEn": 1787571192756,
-    "terminadoEn": null,
+    "terminadoEn": 1787571219060,
     "pausadoEn": null,
     "creadoPor": "Juan Giacosa",
     "iniciadoPor": "Diego Pintos",
-    "terminadoPor": null,
+    "terminadoPor": "Diego Pintos",
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
   }
