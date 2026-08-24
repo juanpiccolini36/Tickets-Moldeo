@@ -344,6 +344,8 @@
   .theme-toggle-btn:hover{ color:var(--text); border-color:var(--text-dim); }
   .indicadores-toolbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
   .indicadores-toolbar h2{ margin:0; }
+  .indicadores-filters{ display:flex; gap:10px; }
+  .indicadores-subtitle{ font-size:13px; color:var(--text-dim); margin:-8px 0 16px; }
   .indicadores-stats-row{ display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
   .stat-card{ flex:1; min-width:170px; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:16px 18px; }
   .stat-card-value{ font-size:28px; font-weight:800; color:var(--text); }
@@ -969,7 +971,8 @@ html += '</div>'; // cierre section-usuarios
     html += '</div>'; // cierre section-historial
     html += '<div id="section-indicadores" style="display:none;">';
     html += '  <div class="panel">';
-    html += '    <div class="indicadores-toolbar"><h2>Indicadores</h2><select id="indicadorRange"><option value="hoy">Hoy</option><option value="semana" selected>Esta semana</option><option value="mes">Este mes</option><option value="todo">Todo</option></select></div>';
+    html += '    <div class="indicadores-toolbar"><h2>Indicadores</h2><div class="indicadores-filters"><select id="indicadorPersona"><option value="">Todos</option></select><select id="indicadorRange"><option value="hoy">Hoy</option><option value="semana" selected>Esta semana</option><option value="mes">Este mes</option><option value="todo">Todo</option></select></div></div>';
+    html += '    <div id="indicadoresSubtitle" class="indicadores-subtitle">Mostrando: todo el equipo</div>';
     html += '    <div id="indicadoresContent"></div>';
     html += '  </div>';
     html += '</div>'; // cierre section-indicadores
@@ -981,6 +984,7 @@ html += '</div>'; // cierre section-usuarios
     document.getElementById('btnAdd').onclick = handleAdd;
     document.getElementById('f_asignado').onchange = refreshAsignadoWorkload;
     document.getElementById('indicadorRange').onchange = refreshIndicadores;
+    document.getElementById('indicadorPersona').onchange = refreshIndicadores;
     refreshAssignSelect();
     document.getElementById('activeHeader').onclick = function(){
       var el = document.getElementById('activeList');
@@ -1063,12 +1067,31 @@ html += '</div>'; // cierre section-usuarios
     return h;
   }
 
+  function refreshIndicadorPersonaSelect(){
+    var sel = document.getElementById('indicadorPersona');
+    if(!sel) return;
+    var current = sel.value;
+    var html = '<option value="">Todos</option>';
+    state.users.filter(function(u){ return u.rol !== 'admin' && u.activo !== false; }).forEach(function(u){
+      html += '<option value="' + u.id + '">' + escapeHtml(u.nombre) + '</option>';
+    });
+    sel.innerHTML = html;
+    if(state.users.some(function(u){ return u.id === current; })){ sel.value = current; }
+  }
+
   function refreshIndicadores(){
     var el = document.getElementById('indicadoresContent');
     if(!el) return;
+    refreshIndicadorPersonaSelect();
     var rangeSel = document.getElementById('indicadorRange');
     var range = rangeSel ? rangeSel.value : 'semana';
+    var personaSel = document.getElementById('indicadorPersona');
+    var personaId = personaSel ? personaSel.value : '';
+    var personaUser = personaId ? state.users.find(function(u){ return u.id === personaId; }) : null;
     var list = ticketsInRange(range);
+    if(personaId){ list = list.filter(function(t){ return t.asignadoA === personaId; }); }
+    var subtitleEl = document.getElementById('indicadoresSubtitle');
+    if(subtitleEl){ subtitleEl.textContent = personaUser ? 'Mostrando: ' + personaUser.nombre : 'Mostrando: todo el equipo'; }
 
     var cargadas = list.length;
     var activas = list.filter(function(t){ return t.estado === 'Pendiente' || t.estado === 'En curso'; }).length;
