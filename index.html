@@ -1474,7 +1474,7 @@ html += '</div>'; // cierre section-usuarios
     if(!sel) return;
     var current = sel.value;
     var html = '<option value="">Sin asignar (todos)</option>';
-    state.users.filter(function(u){ return u.rol === 'operario' && u.activo !== false; }).forEach(function(u){
+    state.users.filter(function(u){ return u.rol !== 'admin' && u.activo !== false; }).forEach(function(u){
       html += '<option value="' + u.id + '">' + escapeHtml(u.nombre) + '</option>';
     });
     sel.innerHTML = html;
