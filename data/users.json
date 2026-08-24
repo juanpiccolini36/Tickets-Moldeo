@@ -36,7 +36,7 @@
     "nombre": "Pablo Diaz",
     "usuario": "pdiaz",
     "clave": "1",
-    "rol": "operario",
+    "rol": "autoelevador",
     "activo": true
   }
 ]
