@@ -342,6 +342,15 @@
     border-radius:6px; padding:8px 14px; cursor:pointer; white-space:nowrap; font-family:inherit;
   }
   .theme-toggle-btn:hover{ color:var(--text); border-color:var(--text-dim); }
+  .indicadores-toolbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .indicadores-toolbar h2{ margin:0; }
+  .indicadores-stats-row{ display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
+  .stat-card{ flex:1; min-width:170px; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:16px 18px; }
+  .stat-card-value{ font-size:28px; font-weight:800; color:var(--text); }
+  .stat-card-label{ font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.04em; margin-top:4px; }
+  .stat-card-sub{ font-size:12px; color:var(--text-dim); margin-top:2px; }
+  .indicadores-cols{ display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
+  .indicadores-cols > .panel{ flex:1; min-width:300px; }
 </style>
 </head>
 <body>
@@ -897,7 +906,7 @@
     html += '    <img src="' + LOGO_B64 + '" alt="Logo" class="board-logo">';
     html += '    <div class="board-header-right">';
     html += '      <div class="current-user-badge">' + (state.currentUser ? escapeHtml(state.currentUser.nombre) : '') + '</div>';
-    html += '      <div class="board-nav"><label>Ir a</label><select id="adminNavSelect"><option value="tickets">O.T.</option><option value="usuarios">Usuarios</option><option value="historial">Historial</option></select></div>';
+    html += '      <div class="board-nav"><label>Ir a</label><select id="adminNavSelect"><option value="tickets">O.T.</option><option value="usuarios">Usuarios</option><option value="historial">Historial</option><option value="indicadores">Indicadores</option></select></div>';
     html += '      <button class="theme-toggle-btn" id="adminThemeToggle">' + (document.body.classList.contains('light-theme') ? '\u2600\ufe0f Claro' : '\ud83c\udf19 Oscuro') + '</button>';
     html += '      <a href="#" class="logout-link-inline" id="logoutLink">Cerrar sesi\u00f3n</a>';
     html += '    </div>';
@@ -958,6 +967,12 @@ html += '</div>'; // cierre section-usuarios
     html += '    <div id="adminHistorialList"></div>';
     html += '  </div>';
     html += '</div>'; // cierre section-historial
+    html += '<div id="section-indicadores" style="display:none;">';
+    html += '  <div class="panel">';
+    html += '    <div class="indicadores-toolbar"><h2>Indicadores</h2><select id="indicadorRange"><option value="hoy">Hoy</option><option value="semana" selected>Esta semana</option><option value="mes">Este mes</option><option value="todo">Todo</option></select></div>';
+    html += '    <div id="indicadoresContent"></div>';
+    html += '  </div>';
+    html += '</div>'; // cierre section-indicadores
     html += '  <div class="toggle-row"><label class="back-link" style="color:var(--text-dim); text-transform:none; letter-spacing:0; font-size:12px;">Cada persona entra con su propio usuario. Los que tengan rol \u00abOperario\u00bb ven directo el tablero; los \u00abSupervisor\u00bb entran a esta pantalla de gesti\u00f3n.</label></div>';
 
     html += '</div>';
@@ -965,6 +980,7 @@ html += '</div>'; // cierre section-usuarios
 
     document.getElementById('btnAdd').onclick = handleAdd;
     document.getElementById('f_asignado').onchange = refreshAsignadoWorkload;
+    document.getElementById('indicadorRange').onchange = refreshIndicadores;
     refreshAssignSelect();
     document.getElementById('activeHeader').onclick = function(){
       var el = document.getElementById('activeList');
@@ -986,7 +1002,9 @@ html += '</div>'; // cierre section-usuarios
       document.getElementById('section-tickets').style.display = (val === 'tickets') ? '' : 'none';
       document.getElementById('section-usuarios').style.display = (val === 'usuarios') ? '' : 'none';
       document.getElementById('section-historial').style.display = (val === 'historial') ? '' : 'none';
+      document.getElementById('section-indicadores').style.display = (val === 'indicadores') ? '' : 'none';
       if(val === 'historial'){ refreshAdminHistorial(); }
+      if(val === 'indicadores'){ refreshIndicadores(); }
     };
     document.getElementById('logoutLink').onclick = function(e){ e.preventDefault(); logout(); };
     document.getElementById('adminThemeToggle').onclick = toggleTheme;
@@ -1009,6 +1027,126 @@ html += '</div>'; // cierre section-usuarios
     refreshAdminLists();
     refreshUserList();
     refreshAdminHistorial();
+    refreshIndicadores();
+  }
+
+  function ticketsInRange(range){
+    var now = Date.now();
+    var cutoff;
+    if(range === 'hoy'){
+      var d = new Date(); d.setHours(0,0,0,0);
+      cutoff = d.getTime();
+    } else if(range === 'semana'){
+      cutoff = now - 7 * 86400000;
+    } else if(range === 'mes'){
+      cutoff = now - 30 * 86400000;
+    } else {
+      cutoff = 0;
+    }
+    return state.tickets.filter(function(t){ return t.creado >= cutoff; });
+  }
+
+  function formatDuration(ms){
+    if(ms === null || ms === undefined || isNaN(ms) || ms < 0){ return '\u2014'; }
+    var hours = ms / 3600000;
+    if(hours < 1){ return Math.round(ms/60000) + ' min'; }
+    if(hours < 48){ return hours.toFixed(1) + ' h'; }
+    return (hours/24).toFixed(1) + ' d\u00edas';
+  }
+
+  function statCard(label, value, sub){
+    var h = '<div class="stat-card">';
+    h += '<div class="stat-card-value">' + value + '</div>';
+    h += '<div class="stat-card-label">' + label + '</div>';
+    if(sub){ h += '<div class="stat-card-sub">' + sub + '</div>'; }
+    h += '</div>';
+    return h;
+  }
+
+  function refreshIndicadores(){
+    var el = document.getElementById('indicadoresContent');
+    if(!el) return;
+    var rangeSel = document.getElementById('indicadorRange');
+    var range = rangeSel ? rangeSel.value : 'semana';
+    var list = ticketsInRange(range);
+
+    var cargadas = list.length;
+    var activas = list.filter(function(t){ return t.estado === 'Pendiente' || t.estado === 'En curso'; }).length;
+    var pausadas = list.filter(function(t){ return t.estado === 'Pausada'; }).length;
+    var completadas = list.filter(function(t){ return t.estado === 'Terminada'; }).length;
+
+    var resueltos = list.filter(function(t){ return t.terminadoEn; });
+    var avgResolucion = resueltos.length ? resueltos.reduce(function(sum,t){ return sum + (t.terminadoEn - t.creado); }, 0) / resueltos.length : null;
+
+    var iniciados = list.filter(function(t){ return t.iniciadoEn; });
+    var avgInicio = iniciados.length ? iniciados.reduce(function(sum,t){ return sum + (t.iniciadoEn - t.creado); }, 0) / iniciados.length : null;
+
+    var prioridadCount = { 'Urgente':0,'Alta':0,'Media':0,'Baja':0 };
+    list.forEach(function(t){ prioridadCount[t.prioridad] = (prioridadCount[t.prioridad]||0) + 1; });
+
+    var sectorCount = {};
+    list.forEach(function(t){ var k = t.sector || 'Sin sector'; sectorCount[k] = (sectorCount[k]||0) + 1; });
+    var sectorTop = Object.keys(sectorCount).map(function(k){ return { sector:k, count:sectorCount[k] }; }).sort(function(a,b){ return b.count-a.count; }).slice(0,8);
+
+    var motivosCount = {};
+    list.forEach(function(t){
+      if(t.historialPausas){
+        t.historialPausas.forEach(function(p){
+          if(p.motivo){
+            var k = p.motivo.trim();
+            motivosCount[k] = (motivosCount[k]||0) + 1;
+          }
+        });
+      }
+    });
+    var motivosTop = Object.keys(motivosCount).map(function(k){ return { motivo:k, count:motivosCount[k] }; }).sort(function(a,b){ return b.count-a.count; }).slice(0,8);
+
+    var html = '';
+    html += '<div class="indicadores-stats-row">';
+    html += statCard('Cargadas', cargadas);
+    html += statCard('Activas', activas);
+    html += statCard('Pausadas', pausadas);
+    html += statCard('Completadas', completadas);
+    html += '</div>';
+
+    html += '<div class="indicadores-stats-row">';
+    html += statCard('Tiempo prom. de resoluci\u00f3n', formatDuration(avgResolucion), resueltos.length + ' O.T. resueltas');
+    html += statCard('Tiempo prom. hasta comenzar', formatDuration(avgInicio), iniciados.length + ' O.T. iniciadas');
+    html += '</div>';
+
+    html += '<div class="indicadores-cols">';
+    html += '  <div class="panel"><h2>Distribuci\u00f3n por prioridad</h2><div class="priority-summary">';
+    ['Urgente','Alta','Media','Baja'].forEach(function(p){
+      html += '<div class="count-pill"><span style="color:' + PRIORITY_COLOR[p] + '; font-weight:700;">' + p.toUpperCase() + '</span><span class="count-num">' + prioridadCount[p] + '</span></div>';
+    });
+    html += '  </div></div>';
+
+    html += '  <div class="panel"><h2>Distribuci\u00f3n por sector / m\u00e1quina</h2>';
+    if(sectorTop.length === 0){
+      html += '<div style="color:var(--text-dim); font-size:14px;">Sin datos en este per\u00edodo.</div>';
+    } else {
+      html += '<div class="priority-summary">';
+      sectorTop.forEach(function(s){
+        html += '<div class="count-pill"><span>' + escapeHtml(s.sector) + '</span><span class="count-num">' + s.count + '</span></div>';
+      });
+      html += '</div>';
+    }
+    html += '  </div>';
+    html += '</div>'; // cierre indicadores-cols
+
+    html += '<div class="panel"><h2>Motivos de pausa m\u00e1s frecuentes</h2>';
+    if(motivosTop.length === 0){
+      html += '<div style="color:var(--text-dim); font-size:14px;">Sin pausas registradas en este per\u00edodo.</div>';
+    } else {
+      html += '<div>';
+      motivosTop.forEach(function(m){
+        html += '<div class="workload-item"><span class="count-num" style="margin-right:12px;">' + m.count + '\u00d7</span>' + escapeHtml(m.motivo) + '</div>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+
+    el.innerHTML = html;
   }
 
   function refreshAdminHistorial(){
@@ -1458,6 +1596,7 @@ html += '</div>'; // cierre section-usuarios
     refreshAdminLists();
     refreshAdminHistorial();
     refreshAsignadoWorkload();
+    refreshIndicadores();
   }
 
   async function enterMode(newMode){
