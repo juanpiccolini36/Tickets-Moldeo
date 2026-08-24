@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-<title>Tablero de Tickets — Sector Moldeo</title>
+<title>Tablero de O.T. — Sector Moldeo</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
   :root{
@@ -22,6 +22,14 @@
     --estado-curso:#2FA6A6;
     --estado-terminada:#4CAF6D;
     --estado-pausada:#D9A441;
+  }
+  body.light-theme{
+    --bg:#F2F3F5;
+    --panel:#FFFFFF;
+    --panel-2:#F5F6F8;
+    --line:#DEE1E6;
+    --text:#1A1D21;
+    --text-dim:#6B7280;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0; padding:0; height:100%;}
@@ -329,6 +337,11 @@
   .admin-edit-grid input, .admin-edit-grid select, .admin-edit-grid textarea{
     padding:8px 10px; background:var(--panel); border:1px solid var(--line); border-radius:6px; color:var(--text); font-family:inherit; font-size:14px;
   }
+  .theme-toggle-btn{
+    font-size:13px; color:var(--text-dim); background:var(--panel-2); border:1px solid var(--line);
+    border-radius:6px; padding:8px 14px; cursor:pointer; white-space:nowrap; font-family:inherit;
+  }
+  .theme-toggle-btn:hover{ color:var(--text); border-color:var(--text-dim); }
 </style>
 </head>
 <body>
@@ -659,6 +672,20 @@
     });
   }
 
+  function applyStoredTheme(){
+    try{
+      var stored = localStorage.getItem('moldeo_theme');
+      if(stored === 'light'){ document.body.classList.add('light-theme'); }
+    }catch(e){}
+  }
+
+  function toggleTheme(){
+    document.body.classList.toggle('light-theme');
+    try{ localStorage.setItem('moldeo_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark'); }catch(e){}
+    var btn = document.getElementById('themeToggle');
+    if(btn){ btn.textContent = document.body.classList.contains('light-theme') ? '\u2600\ufe0f Claro' : '\ud83c\udf19 Oscuro'; }
+  }
+
   function renderBoardHeader(){
     var html = '';
     html += '<div class="board-header">';
@@ -666,6 +693,7 @@
     html += '  <div class="board-header-right">';
     html += '    <div class="current-user-badge">' + (state.currentUser ? escapeHtml(state.currentUser.nombre) : '') + '</div>';
     html += '    <div class="board-nav"><label>Ir a</label><select id="boardNavSelect"><option value="tablero"' + (boardSection==='tablero'?' selected':'') + '>Tablero</option><option value="historial"' + (boardSection==='historial'?' selected':'') + '>Historial</option></select></div>';
+    html += '    <button class="theme-toggle-btn" id="themeToggle">' + (document.body.classList.contains('light-theme') ? '\u2600\ufe0f Claro' : '\ud83c\udf19 Oscuro') + '</button>';
     html += '    <a href="#" class="logout-link-inline" id="logoutLink">Cerrar sesi\u00f3n</a>';
     html += '  </div>';
     html += '</div>';
@@ -675,6 +703,7 @@
   function wireBoardHeader(){
     document.getElementById('logoutLink').onclick = function(e){ e.preventDefault(); logout(); };
     document.getElementById('boardNavSelect').onchange = function(){ boardSection = this.value; renderBoardSection(); };
+    document.getElementById('themeToggle').onclick = toggleTheme;
   }
 
   function renderBoardSection(){
@@ -683,7 +712,7 @@
 
   function renderHistorial(){
     var app = document.getElementById('app');
-    var allDone = state.tickets.filter(function(t){ return t.estado === 'Terminada'; }).sort(function(a,b){ return b.terminadoEn - a.terminadoEn; });
+    var allDone = visibleForRole(state.tickets.filter(function(t){ return t.estado === 'Terminada'; })).sort(function(a,b){ return b.terminadoEn - a.terminadoEn; });
 
     var html = renderBoardHeader();
     html += '<div class="board-main">';
@@ -715,9 +744,18 @@
     wireTicketModalCells(app);
   }
 
+  function visibleForRole(list){
+    if(!state.currentUser || state.currentUser.rol === 'admin'){ return list; }
+    return list.filter(function(t){
+      if(!t.asignadoA){ return true; }
+      var assignee = state.users.find(function(u){ return u.id === t.asignadoA; });
+      return !assignee || assignee.rol === state.currentUser.rol;
+    });
+  }
+
   function renderBoard(){
     var app = document.getElementById('app');
-    var allActive = sortedActive();
+    var allActive = visibleForRole(sortedActive());
     var activeForCounts = (boardFilterMine && state.currentUser) ? allActive.filter(function(t){ return t.asignadoA === state.currentUser.id; }) : allActive;
     var active = activeForCounts;
     if(boardPriorityFilter){ active = active.filter(function(t){ return t.prioridad === boardPriorityFilter; }); }
@@ -790,7 +828,7 @@
 
     html += '</div>';
 
-    var allDone = doneToday();
+    var allDone = visibleForRole(doneToday());
     var done = (boardFilterMine && state.currentUser) ? allDone.filter(function(t){ return t.asignadoA === state.currentUser.id; }) : allDone;
     if(done.length){
       html += '<div class="done-strip"><h3>Completadas hoy</h3>';
@@ -858,7 +896,7 @@
     html += '    <img src="' + LOGO_B64 + '" alt="Logo" class="board-logo">';
     html += '    <div class="board-header-right">';
     html += '      <div class="current-user-badge">' + (state.currentUser ? escapeHtml(state.currentUser.nombre) : '') + '</div>';
-    html += '      <div class="board-nav"><label>Ir a</label><select id="adminNavSelect"><option value="tickets">Tickets</option><option value="usuarios">Usuarios</option><option value="historial">Historial</option></select></div>';
+    html += '      <div class="board-nav"><label>Ir a</label><select id="adminNavSelect"><option value="tickets">O.T.</option><option value="usuarios">Usuarios</option><option value="historial">Historial</option></select></div>';
     html += '      <a href="#" class="logout-link-inline" id="logoutLink">Cerrar sesi\u00f3n</a>';
     html += '    </div>';
     html += '  </div>';
@@ -867,7 +905,7 @@
     html += '<div id="section-tickets">';
     html += '<div class="form-row-flex">';
     html += '  <div class="panel panel-narrow">';
-    html += '    <h2>Nuevo ticket</h2>';
+    html += '    <h2>Nueva O.T.</h2>';
     html += '    <div class="form-grid">';
     html += '      <div><label>Sector / Máquina</label><input type="text" id="f_sector" placeholder="Ej: Matriz 12 / Prensa 4"></div>';
     html += '      <div><label>Prioridad</label><select id="f_prioridad"><option>Urgente</option><option>Alta</option><option selected>Media</option><option>Baja</option></select></div>';
@@ -875,7 +913,7 @@
     html += '      <div class="full"><label>Tarea</label><input type="text" id="f_tarea" placeholder="Descripción breve de la tarea"></div>';
     html += '      <div class="full"><label>Detalle (opcional)</label><textarea id="f_detalle" placeholder="Aclaraciones, repuestos necesarios, etc."></textarea></div>';
     html += '    </div>';
-    html += '    <div class="btn-row"><button class="btn btn-primary" id="btnAdd">Crear ticket</button></div>';
+    html += '    <div class="btn-row"><button class="btn btn-primary" id="btnAdd">Crear O.T.</button></div>';
     html += '  </div>';
 
         html += '  <div class="panel" id="workloadPanel">';
@@ -899,7 +937,7 @@
     html += '    <h2>Usuarios</h2>';
     html += '    <div class="form-grid">';
     html += '      <div><label>Nombre</label><input type="text" id="u_nombre" placeholder="Ej: Pedro G\u00f3mez"></div>';
-    html += '      <div><label>Rol</label><select id="u_rol"><option value="operario">Operario</option><option value="admin">Supervisor</option></select></div>';
+    html += '      <div><label>Rol</label><select id="u_rol"><option value="operario">Operario</option><option value="autoelevador">Autoelevador</option><option value="admin">Supervisor</option></select></div>';
     html += '      <div><label>Usuario</label><input type="text" id="u_usuario" placeholder="usuario de acceso"></div>';
     html += '      <div><label>Clave</label><input type="text" id="u_clave" placeholder="c\u00f3digo corto asignado por vos, no una contrase\u00f1a personal"></div>';
     html += '    </div>';
@@ -914,7 +952,7 @@
 html += '</div>'; // cierre section-usuarios
     html += '<div id="section-historial" style="display:none;">';
     html += '  <div class="panel">';
-    html += '    <h2>Historial de mis tickets</h2>';
+    html += '    <h2>Historial de mis O.T.</h2>';
     html += '    <div id="adminHistorialList"></div>';
     html += '  </div>';
     html += '</div>'; // cierre section-historial
@@ -977,7 +1015,7 @@ html += '</div>'; // cierre section-usuarios
     var mine = state.tickets.filter(function(t){ return t.estado === 'Terminada' && t.creadoPor === miNombre; })
       .sort(function(a,b){ return b.terminadoEn - a.terminadoEn; });
     if(mine.length === 0){
-      el.innerHTML = '<div style="color:var(--text-dim); font-size:14px;">Todav\u00eda no gener\u00e1ste tickets completados.</div>';
+      el.innerHTML = '<div style="color:var(--text-dim); font-size:14px;">Todav\u00eda no gener\u00e1ste O.T. completadas.</div>';
       return;
     }
     var html = '<div class="board-table-wrap"><table class="board-table"><thead><tr>';
@@ -1112,7 +1150,7 @@ html += '</div>'; // cierre section-usuarios
     el.querySelectorAll('[data-del]').forEach(function(btn){
       btn.onclick = function(){
         var id = btn.getAttribute('data-del');
-        if(confirm('\u00bfEliminar este ticket definitivamente?')){
+        if(confirm('\u00bfEliminar esta O.T. definitivamente?')){
           deleteTicket(id);
         }
       };
@@ -1155,12 +1193,12 @@ html += '</div>'; // cierre section-usuarios
       var isMe = state.currentUser && state.currentUser.usuario === u.usuario;
       if(editingUserId === u.id){
         html += '<div class="admin-ticket admin-ticket-editing">';
-        html += '  <div class="bar" style="background:' + (u.rol === 'admin' ? 'var(--accent)' : 'var(--baja)') + '"></div>';
+        html += '  <div class="bar" style="background:' + (roleColor(u.rol)) + '"></div>';
         html += '  <div class="admin-ticket-editform">';
         html += '    <input type="text" class="edit-u-nombre" value="' + escapeHtml(u.nombre) + '" placeholder="Nombre">';
         html += '    <input type="text" class="edit-u-usuario" value="' + escapeHtml(u.usuario) + '" placeholder="Usuario">';
         html += '    <input type="text" class="edit-u-clave" value="' + escapeHtml(u.clave) + '" placeholder="Clave">';
-        html += '    <select class="edit-u-rol"><option value="operario"' + (u.rol==='operario'?' selected':'') + '>Operario</option><option value="admin"' + (u.rol==='admin'?' selected':'') + '>Supervisor</option></select>';
+        html += '    <select class="edit-u-rol"><option value="operario"' + (u.rol==='operario'?' selected':'') + '>Operario</option><option value="autoelevador"' + (u.rol==='autoelevador'?' selected':'') + '>Autoelevador</option><option value="admin"' + (u.rol==='admin'?' selected':'') + '>Supervisor</option></select>';
         html += '  </div>';
         html += '  <div class="admin-controls">';
         html += '    <button class="icon-btn icon-btn-save" data-usersave="' + u.id + '">Guardar</button>';
@@ -1170,8 +1208,8 @@ html += '</div>'; // cierre section-usuarios
         return;
       }
       html += '<div class="admin-ticket">';
-      html += '  <div class="bar" style="background:' + (u.rol === 'admin' ? 'var(--accent)' : 'var(--baja)') + '"></div>';
-      html += '  <div class="admin-ticket-info"><div class="t">' + escapeHtml(u.nombre) + ' (' + escapeHtml(u.usuario) + ')' + (isMe ? ' \u2014 vos' : '') + '</div><div class="s">' + (u.rol === 'admin' ? 'Supervisor' : 'Operario') + (u.activo === false ? ' \u00b7 inactivo' : '') + '</div></div>';
+      html += '  <div class="bar" style="background:' + (roleColor(u.rol)) + '"></div>';
+      html += '  <div class="admin-ticket-info"><div class="t">' + escapeHtml(u.nombre) + ' (' + escapeHtml(u.usuario) + ')' + (isMe ? ' \u2014 vos' : '') + '</div><div class="s">' + roleLabel(u.rol) + (u.activo === false ? ' \u00b7 inactivo' : '') + '</div></div>';
       html += '  <div class="admin-controls">';
       html += '    <button class="icon-btn" data-useredit="' + u.id + '">Editar</button>';
       if(!isMe){
@@ -1278,6 +1316,18 @@ html += '</div>'; // cierre section-usuarios
     wireTicketModalCells(container);
   }
 
+  function roleColor(rol){
+    if(rol === 'admin'){ return 'var(--accent)'; }
+    if(rol === 'autoelevador'){ return 'var(--alta)'; }
+    return 'var(--baja)';
+  }
+
+  function roleLabel(rol){
+    if(rol === 'admin'){ return 'Supervisor'; }
+    if(rol === 'autoelevador'){ return 'Autoelevador'; }
+    return 'Operario';
+  }
+
   function refreshAssignSelect(){
     var sel = document.getElementById('f_asignado');
     if(!sel) return;
@@ -1315,7 +1365,7 @@ html += '</div>'; // cierre section-usuarios
     document.getElementById('f_detalle').value = '';
     document.getElementById('f_prioridad').value = 'Media';
     document.getElementById('f_asignado').value = '';
-    btn.disabled = false; btn.textContent = 'Crear ticket';
+    btn.disabled = false; btn.textContent = 'Crear O.T.';
     refreshAdminLists();
     refreshAsignadoWorkload();
   }
@@ -1350,7 +1400,7 @@ html += '</div>'; // cierre section-usuarios
     var html = '';
     html += '<div class="login-wrap"><div class="login-card">';
     html += '  <div class="login-dot"></div>';
-    html += '  <h1 class="display">Tickets — Sector Moldeo</h1>';
+    html += '  <h1 class="display">O.T. — Sector Moldeo</h1>';
     html += '  <div class="sub">Ingresá con tu usuario para continuar</div>';
     html += '  <div class="login-error">' + (errorMsg ? escapeHtml(errorMsg) : '') + '</div>';
     html += '  <label>Usuario</label><input type="text" id="l_user" autocomplete="username">';
@@ -1426,6 +1476,7 @@ html += '</div>'; // cierre section-usuarios
   }
 
   function init(){
+    applyStoredTheme();
     renderLogin();
   }
 
