@@ -38,5 +38,13 @@
     "clave": "1",
     "rol": "autoelevador",
     "activo": true
+  },
+  {
+    "id": "u_mt75apes",
+    "nombre": "Test Autoelevador",
+    "usuario": "testautoelev",
+    "clave": "1",
+    "rol": "autoelevador",
+    "activo": true
   }
 ]
