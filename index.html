@@ -901,6 +901,7 @@
   var boardPriorityFilter = null;
   var boardStatusFilter = null;
   var indicadoresLastList = [];
+  var indicadorDetailOpen = null;
 
   function buildAdminShell(){
     var app = document.getElementById('app');
@@ -1176,6 +1177,8 @@ html += '</div>'; // cierre section-usuarios
     indicadoresLastList = list;
     el.innerHTML = html;
 
+    if(indicadorDetailOpen){ renderIndicadorDetail(indicadorDetailOpen.type, indicadorDetailOpen.value); }
+
     el.querySelectorAll('[data-detail]').forEach(function(node){
       node.onclick = function(){
         renderIndicadorDetail(node.getAttribute('data-detail'), node.getAttribute('data-detail-value'));
@@ -1186,6 +1189,7 @@ html += '</div>'; // cierre section-usuarios
   function renderIndicadorDetail(type, value){
     var el = document.getElementById('indicadoresDetail');
     if(!el) return;
+    indicadorDetailOpen = { type: type, value: value };
     var subset = [];
     var label = '';
     if(type === 'estado'){
@@ -1232,7 +1236,7 @@ html += '</div>'; // cierre section-usuarios
     html += '</div>';
     el.innerHTML = html;
     wireTicketModalCells(el);
-    document.getElementById('closeIndicadorDetail').onclick = function(){ el.innerHTML = ''; };
+    document.getElementById('closeIndicadorDetail').onclick = function(){ indicadorDetailOpen = null; el.innerHTML = ''; };
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
