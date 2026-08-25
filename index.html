@@ -353,6 +353,13 @@
   .stat-card-sub{ font-size:12px; color:var(--text-dim); margin-top:2px; }
   .indicadores-cols{ display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
   .indicadores-cols > .panel{ flex:1; min-width:300px; }
+  .pie-chart-row{ display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
+  .pie-chart-svg{ width:150px; height:150px; flex-shrink:0; }
+  .pie-chart-total{ font-size:22px; font-weight:800; fill:var(--text); font-family:inherit; }
+  .pie-chart-total-label{ font-size:9px; fill:var(--text-dim); text-transform:uppercase; letter-spacing:0.04em; font-family:inherit; }
+  .pie-chart-legend{ flex:1; min-width:220px; display:flex; flex-direction:column; }
+  .pie-chart-pct{ color:var(--text-dim); font-weight:400; }
+  .indicador-panel-body{ margin-top:4px; }
 </style>
 </head>
 <body>
@@ -902,6 +909,7 @@
   var boardStatusFilter = null;
   var indicadoresLastList = [];
   var indicadorDetailOpen = null;
+  var indicadoresCollapsed = {};
 
   function buildAdminShell(){
     var app = document.getElementById('app');
@@ -1082,6 +1090,35 @@ html += '</div>'; // cierre section-usuarios
     if(state.users.some(function(u){ return u.id === current; })){ sel.value = current; }
   }
 
+  function indicadorPanel(key, title, bodyHtml){
+    var collapsed = !!indicadoresCollapsed[key];
+    var h = '<div class="panel">';
+    h += '<h2 class="collapsible-header" data-collapse-key="' + key + '"><span>' + title + '</span><span class="collapse-arrow">' + (collapsed ? '\u25b8' : '\u25be') + '</span></h2>';
+    h += '<div class="indicador-panel-body" data-collapse-body="' + key + '"' + (collapsed ? ' style="display:none;"' : '') + '>' + bodyHtml + '</div>';
+    h += '</div>';
+    return h;
+  }
+
+  function buildDonutSVG(counts, total){
+    var order = ['Urgente','Alta','Media','Baja'];
+    var r = 60, cx = 70, cy = 70, sw = 22;
+    var circumference = 2 * Math.PI * r;
+    var cumulative = 0;
+    var svg = '<svg viewBox="0 0 140 140" class="pie-chart-svg">';
+    svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="var(--line)" stroke-width="' + sw + '"></circle>';
+    order.forEach(function(p){
+      var count = counts[p] || 0;
+      if(count === 0) return;
+      var length = (count / total) * circumference;
+      svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + PRIORITY_COLOR[p] + '" stroke-width="' + sw + '" stroke-dasharray="' + length.toFixed(2) + ' ' + (circumference - length).toFixed(2) + '" stroke-dashoffset="' + (-cumulative).toFixed(2) + '" transform="rotate(-90 ' + cx + ' ' + cy + ')"></circle>';
+      cumulative += length;
+    });
+    svg += '<text x="' + cx + '" y="' + (cy-4) + '" text-anchor="middle" class="pie-chart-total">' + total + '</text>';
+    svg += '<text x="' + cx + '" y="' + (cy+16) + '" text-anchor="middle" class="pie-chart-total-label">total</text>';
+    svg += '</svg>';
+    return svg;
+  }
+
   function refreshIndicadores(){
     var el = document.getElementById('indicadoresContent');
     if(!el) return;
@@ -1094,7 +1131,7 @@ html += '</div>'; // cierre section-usuarios
     var list = ticketsInRange(range);
     if(personaId){ list = list.filter(function(t){ return t.asignadoA === personaId; }); }
     var subtitleEl = document.getElementById('indicadoresSubtitle');
-    if(subtitleEl){ subtitleEl.textContent = personaUser ? 'Mostrando: ' + personaUser.nombre : 'Mostrando: todo el equipo'; }
+    if(subtitleEl){ subtitleEl.textContent = 'Mostrando: ' + (personaUser ? personaUser.nombre : 'todo el equipo'); }
 
     var cargadas = list.length;
     var activas = list.filter(function(t){ return t.estado === 'Pendiente' || t.estado === 'En curso'; }).length;
@@ -1127,51 +1164,60 @@ html += '</div>'; // cierre section-usuarios
     });
     var motivosTop = Object.keys(motivosCount).map(function(k){ return { motivo:k, count:motivosCount[k] }; }).sort(function(a,b){ return b.count-a.count; }).slice(0,8);
 
-    var html = '';
-    html += '<div class="indicadores-stats-row">';
-    html += statCard('Cargadas', cargadas, null, 'estado', 'cargadas');
-    html += statCard('Activas', activas, null, 'estado', 'activas');
-    html += statCard('Pausadas', pausadas, null, 'estado', 'pausadas');
-    html += statCard('Completadas', completadas, null, 'estado', 'completadas');
-    html += '</div>';
+    var bodyTotales = '<div class="indicadores-stats-row">';
+    bodyTotales += statCard('Cargadas', cargadas, null, 'estado', 'cargadas');
+    bodyTotales += statCard('Activas', activas, null, 'estado', 'activas');
+    bodyTotales += statCard('Pausadas', pausadas, null, 'estado', 'pausadas');
+    bodyTotales += statCard('Completadas', completadas, null, 'estado', 'completadas');
+    bodyTotales += '</div>';
 
-    html += '<div class="indicadores-stats-row">';
-    html += statCard('Tiempo prom. de resoluci\u00f3n', formatDuration(avgResolucion), resueltos.length + ' O.T. resueltas');
-    html += statCard('Tiempo prom. hasta comenzar', formatDuration(avgInicio), iniciados.length + ' O.T. iniciadas');
-    html += '</div>';
+    var bodyTiempos = '<div class="indicadores-stats-row">';
+    bodyTiempos += statCard('Tiempo prom. de resoluci\u00f3n', formatDuration(avgResolucion), resueltos.length + ' O.T. resueltas');
+    bodyTiempos += statCard('Tiempo prom. hasta comenzar', formatDuration(avgInicio), iniciados.length + ' O.T. iniciadas');
+    bodyTiempos += '</div>';
 
-    html += '<div class="indicadores-cols">';
-    html += '  <div class="panel"><h2>Distribuci\u00f3n por prioridad</h2><div class="priority-summary">';
-    ['Urgente','Alta','Media','Baja'].forEach(function(p){
-      html += '<div class="count-pill" data-detail="prioridad" data-detail-value="' + p + '"><span style="color:' + PRIORITY_COLOR[p] + '; font-weight:700;">' + p.toUpperCase() + '</span><span class="count-num">' + prioridadCount[p] + '</span></div>';
-    });
-    html += '  </div></div>';
+    var bodyPrioridad = '';
+    if(cargadas === 0){
+      bodyPrioridad = '<div style="color:var(--text-dim); font-size:14px;">Sin datos en este per\u00edodo.</div>';
+    } else {
+      bodyPrioridad = '<div class="pie-chart-row">';
+      bodyPrioridad += buildDonutSVG(prioridadCount, cargadas);
+      bodyPrioridad += '<div class="pie-chart-legend">';
+      ['Urgente','Alta','Media','Baja'].forEach(function(p){
+        var pct = cargadas ? Math.round(prioridadCount[p] / cargadas * 100) : 0;
+        bodyPrioridad += '<div class="count-pill" data-detail="prioridad" data-detail-value="' + p + '"><span style="color:' + PRIORITY_COLOR[p] + '; font-weight:700;">' + p.toUpperCase() + '</span><span class="count-num">' + prioridadCount[p] + ' <span class="pie-chart-pct">(' + pct + '%)</span></span></div>';
+      });
+      bodyPrioridad += '</div></div>';
+    }
 
-    html += '  <div class="panel"><h2>Distribuci\u00f3n por sector / m\u00e1quina</h2>';
+    var bodySector = '';
     if(sectorTop.length === 0){
-      html += '<div style="color:var(--text-dim); font-size:14px;">Sin datos en este per\u00edodo.</div>';
+      bodySector = '<div style="color:var(--text-dim); font-size:14px;">Sin datos en este per\u00edodo.</div>';
     } else {
-      html += '<div class="priority-summary">';
+      bodySector = '<div class="priority-summary">';
       sectorTop.forEach(function(s){
-        html += '<div class="count-pill" data-detail="sector" data-detail-value="' + escapeHtml(s.sector) + '"><span>' + escapeHtml(s.sector) + '</span><span class="count-num">' + s.count + '</span></div>';
+        bodySector += '<div class="count-pill" data-detail="sector" data-detail-value="' + escapeHtml(s.sector) + '"><span>' + escapeHtml(s.sector) + '</span><span class="count-num">' + s.count + '</span></div>';
       });
-      html += '</div>';
+      bodySector += '</div>';
     }
-    html += '  </div>';
-    html += '</div>'; // cierre indicadores-cols
 
-    html += '<div class="panel"><h2>Motivos de pausa m\u00e1s frecuentes</h2>';
+    var bodyMotivos = '';
     if(motivosTop.length === 0){
-      html += '<div style="color:var(--text-dim); font-size:14px;">Sin pausas registradas en este per\u00edodo.</div>';
+      bodyMotivos = '<div style="color:var(--text-dim); font-size:14px;">Sin pausas registradas en este per\u00edodo.</div>';
     } else {
-      html += '<div>';
+      bodyMotivos = '<div>';
       motivosTop.forEach(function(m){
-        html += '<div class="workload-item" data-detail="motivo" data-detail-value="' + escapeHtml(m.motivo) + '" style="cursor:pointer;"><span class="count-num" style="margin-right:12px;">' + m.count + '\u00d7</span>' + escapeHtml(m.motivo) + '</div>';
+        bodyMotivos += '<div class="workload-item" data-detail="motivo" data-detail-value="' + escapeHtml(m.motivo) + '" style="cursor:pointer;"><span class="count-num" style="margin-right:12px;">' + m.count + '\u00d7</span>' + escapeHtml(m.motivo) + '</div>';
       });
-      html += '</div>';
+      bodyMotivos += '</div>';
     }
-    html += '</div>';
 
+    var html = '';
+    html += indicadorPanel('totales', 'Totales', bodyTotales);
+    html += indicadorPanel('tiempos', 'Tiempos promedio', bodyTiempos);
+    html += indicadorPanel('prioridad', 'Distribuci\u00f3n por prioridad', bodyPrioridad);
+    html += indicadorPanel('sector', 'Distribuci\u00f3n por sector / m\u00e1quina', bodySector);
+    html += indicadorPanel('motivos', 'Motivos de pausa m\u00e1s frecuentes', bodyMotivos);
     html += '<div id="indicadoresDetail"></div>';
 
     indicadoresLastList = list;
@@ -1182,6 +1228,16 @@ html += '</div>'; // cierre section-usuarios
     el.querySelectorAll('[data-detail]').forEach(function(node){
       node.onclick = function(){
         renderIndicadorDetail(node.getAttribute('data-detail'), node.getAttribute('data-detail-value'));
+      };
+    });
+    el.querySelectorAll('[data-collapse-key]').forEach(function(header){
+      header.onclick = function(){
+        var key = header.getAttribute('data-collapse-key');
+        indicadoresCollapsed[key] = !indicadoresCollapsed[key];
+        var body = el.querySelector('[data-collapse-body="' + key + '"]');
+        var arrow = header.querySelector('.collapse-arrow');
+        if(indicadoresCollapsed[key]){ body.style.display = 'none'; arrow.textContent = '\u25b8'; }
+        else { body.style.display = ''; arrow.textContent = '\u25be'; }
       };
     });
   }
