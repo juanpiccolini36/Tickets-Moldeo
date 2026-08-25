@@ -1150,6 +1150,17 @@ html += '</div>'; // cierre section-usuarios
     var iniciados = list.filter(function(t){ return t.iniciadoEn; });
     var avgInicio = iniciados.length ? iniciados.reduce(function(sum,t){ return sum + (t.iniciadoEn - t.creado); }, 0) / iniciados.length : null;
 
+    var todasLasPausas = [];
+    list.forEach(function(t){
+      if(t.historialPausas){
+        t.historialPausas.forEach(function(ps){
+          var fin = ps.reanudadoEn || Date.now();
+          todasLasPausas.push(fin - ps.pausadoEn);
+        });
+      }
+    });
+    var avgPausa = todasLasPausas.length ? todasLasPausas.reduce(function(sum,d){ return sum + d; }, 0) / todasLasPausas.length : null;
+
     var prioridadCount = { 'Urgente':0,'Alta':0,'Media':0,'Baja':0 };
     list.forEach(function(t){ prioridadCount[t.prioridad] = (prioridadCount[t.prioridad]||0) + 1; });
 
@@ -1180,6 +1191,7 @@ html += '</div>'; // cierre section-usuarios
     var bodyTiempos = '<div class="indicadores-stats-row">';
     bodyTiempos += statCard('Tiempo prom. de resoluci\u00f3n', formatDuration(avgResolucion), resueltos.length + ' O.T. resueltas');
     bodyTiempos += statCard('Tiempo prom. hasta comenzar', formatDuration(avgInicio), iniciados.length + ' O.T. iniciadas');
+    bodyTiempos += statCard('Tiempo prom. de pausa', formatDuration(avgPausa), todasLasPausas.length + (todasLasPausas.length === 1 ? ' pausa registrada' : ' pausas registradas'), 'pausasconteo', 'todas');
     bodyTiempos += '</div>';
 
     var bodyPrioridad = '';
@@ -1272,6 +1284,9 @@ html += '</div>'; // cierre section-usuarios
         return t.historialPausas && t.historialPausas.some(function(p){ return p.motivo && p.motivo.trim() === value; });
       });
       label = 'Motivo: ' + value;
+    } else if(type === 'pausasconteo'){
+      subset = indicadoresLastList.filter(function(t){ return t.historialPausas && t.historialPausas.length > 0; });
+      label = 'Con pausas registradas';
     }
 
     var html = '<div class="panel" id="indicadorDetailPanel">';
