@@ -354,13 +354,14 @@
   .indicadores-cols{ display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
   .indicadores-cols > .panel{ flex:1; min-width:300px; }
   .pie-chart-row{ display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
-  .pie-chart-svg{ width:124px; height:124px; flex-shrink:0; animation:pieGrow 0.5s cubic-bezier(0.2,0.8,0.2,1); }
+  .pie-chart-svg{ width:170px; height:170px; flex-shrink:0; animation:pieGrow 0.5s cubic-bezier(0.2,0.8,0.2,1); }
   @keyframes pieGrow{ from{ opacity:0; transform:scale(0.8); } to{ opacity:1; transform:scale(1); } }
   .pie-seg{ transition:opacity 0.15s, stroke-width 0.15s; cursor:pointer; }
   .pie-seg:hover{ opacity:0.82; }
-  .pie-chart-total{ font-size:20px; font-weight:800; fill:var(--text); font-family:inherit; }
-  .pie-chart-total-label{ font-size:9px; fill:var(--text-dim); text-transform:uppercase; letter-spacing:0.04em; font-family:inherit; }
-  .pie-chart-legend{ flex:1; min-width:180px; display:flex; flex-direction:column; }
+  .pie-chart-total{ font-size:26px; font-weight:800; fill:var(--text); font-family:inherit; }
+  .pie-chart-total-label{ font-size:10px; fill:var(--text-dim); text-transform:uppercase; letter-spacing:0.04em; font-family:inherit; }
+  .pie-chart-legend{ flex:1; min-width:170px; display:flex; flex-direction:column; gap:2px; align-self:center; }
+  .pie-chart-legend .count-pill{ padding:6px 10px; }
   .pie-chart-pct{ color:var(--text-dim); font-weight:400; }
   .indicador-panel-body{ margin-top:4px; }
 </style>
@@ -1104,11 +1105,11 @@ html += '</div>'; // cierre section-usuarios
 
   function buildDonutSVG(counts, total){
     var order = ['Urgente','Alta','Media','Baja'];
-    var r = 52, cx = 62, cy = 62, sw = 20;
+    var r = 70, cx = 82, cy = 82, sw = 26;
     var circumference = 2 * Math.PI * r;
-    var gap = total > 1 ? 6 : 0;
+    var gap = total > 1 ? 7 : 0;
     var cumulative = 0;
-    var svg = '<svg viewBox="0 0 124 124" class="pie-chart-svg">';
+    var svg = '<svg viewBox="0 0 164 164" class="pie-chart-svg">';
     svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="var(--line)" stroke-width="' + sw + '"></circle>';
     order.forEach(function(p){
       var count = counts[p] || 0;
@@ -1118,8 +1119,8 @@ html += '</div>'; // cierre section-usuarios
       svg += '<circle class="pie-seg" cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + PRIORITY_COLOR[p] + '" stroke-width="' + sw + '" stroke-linecap="round" stroke-dasharray="' + length.toFixed(2) + ' ' + (circumference - length).toFixed(2) + '" stroke-dashoffset="' + (-cumulative).toFixed(2) + '" transform="rotate(-90 ' + cx + ' ' + cy + ')"><title>' + p + ': ' + count + ' (' + Math.round(count/total*100) + '%)</title></circle>';
       cumulative += rawLength;
     });
-    svg += '<text x="' + cx + '" y="' + (cy-3) + '" text-anchor="middle" class="pie-chart-total">' + total + '</text>';
-    svg += '<text x="' + cx + '" y="' + (cy+15) + '" text-anchor="middle" class="pie-chart-total-label">total</text>';
+    svg += '<text x="' + cx + '" y="' + (cy-4) + '" text-anchor="middle" class="pie-chart-total">' + total + '</text>';
+    svg += '<text x="' + cx + '" y="' + (cy+18) + '" text-anchor="middle" class="pie-chart-total-label">total</text>';
     svg += '</svg>';
     return svg;
   }
