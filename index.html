@@ -353,11 +353,14 @@
   .stat-card-sub{ font-size:12px; color:var(--text-dim); margin-top:2px; }
   .indicadores-cols{ display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
   .indicadores-cols > .panel{ flex:1; min-width:300px; }
-  .pie-chart-row{ display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
-  .pie-chart-svg{ width:150px; height:150px; flex-shrink:0; }
-  .pie-chart-total{ font-size:22px; font-weight:800; fill:var(--text); font-family:inherit; }
+  .pie-chart-row{ display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+  .pie-chart-svg{ width:124px; height:124px; flex-shrink:0; animation:pieGrow 0.5s cubic-bezier(0.2,0.8,0.2,1); }
+  @keyframes pieGrow{ from{ opacity:0; transform:scale(0.8); } to{ opacity:1; transform:scale(1); } }
+  .pie-seg{ transition:opacity 0.15s, stroke-width 0.15s; cursor:pointer; }
+  .pie-seg:hover{ opacity:0.82; }
+  .pie-chart-total{ font-size:20px; font-weight:800; fill:var(--text); font-family:inherit; }
   .pie-chart-total-label{ font-size:9px; fill:var(--text-dim); text-transform:uppercase; letter-spacing:0.04em; font-family:inherit; }
-  .pie-chart-legend{ flex:1; min-width:220px; display:flex; flex-direction:column; }
+  .pie-chart-legend{ flex:1; min-width:180px; display:flex; flex-direction:column; }
   .pie-chart-pct{ color:var(--text-dim); font-weight:400; }
   .indicador-panel-body{ margin-top:4px; }
 </style>
@@ -1101,20 +1104,22 @@ html += '</div>'; // cierre section-usuarios
 
   function buildDonutSVG(counts, total){
     var order = ['Urgente','Alta','Media','Baja'];
-    var r = 60, cx = 70, cy = 70, sw = 22;
+    var r = 52, cx = 62, cy = 62, sw = 20;
     var circumference = 2 * Math.PI * r;
+    var gap = total > 1 ? 6 : 0;
     var cumulative = 0;
-    var svg = '<svg viewBox="0 0 140 140" class="pie-chart-svg">';
+    var svg = '<svg viewBox="0 0 124 124" class="pie-chart-svg">';
     svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="var(--line)" stroke-width="' + sw + '"></circle>';
     order.forEach(function(p){
       var count = counts[p] || 0;
       if(count === 0) return;
-      var length = (count / total) * circumference;
-      svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + PRIORITY_COLOR[p] + '" stroke-width="' + sw + '" stroke-dasharray="' + length.toFixed(2) + ' ' + (circumference - length).toFixed(2) + '" stroke-dashoffset="' + (-cumulative).toFixed(2) + '" transform="rotate(-90 ' + cx + ' ' + cy + ')"></circle>';
-      cumulative += length;
+      var rawLength = (count / total) * circumference;
+      var length = Math.max(rawLength - gap, 1);
+      svg += '<circle class="pie-seg" cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + PRIORITY_COLOR[p] + '" stroke-width="' + sw + '" stroke-linecap="round" stroke-dasharray="' + length.toFixed(2) + ' ' + (circumference - length).toFixed(2) + '" stroke-dashoffset="' + (-cumulative).toFixed(2) + '" transform="rotate(-90 ' + cx + ' ' + cy + ')"><title>' + p + ': ' + count + ' (' + Math.round(count/total*100) + '%)</title></circle>';
+      cumulative += rawLength;
     });
-    svg += '<text x="' + cx + '" y="' + (cy-4) + '" text-anchor="middle" class="pie-chart-total">' + total + '</text>';
-    svg += '<text x="' + cx + '" y="' + (cy+16) + '" text-anchor="middle" class="pie-chart-total-label">total</text>';
+    svg += '<text x="' + cx + '" y="' + (cy-3) + '" text-anchor="middle" class="pie-chart-total">' + total + '</text>';
+    svg += '<text x="' + cx + '" y="' + (cy+15) + '" text-anchor="middle" class="pie-chart-total-label">total</text>';
     svg += '</svg>';
     return svg;
   }
@@ -1215,8 +1220,10 @@ html += '</div>'; // cierre section-usuarios
     var html = '';
     html += indicadorPanel('totales', 'Totales', bodyTotales);
     html += indicadorPanel('tiempos', 'Tiempos promedio', bodyTiempos);
+    html += '<div class="indicadores-cols">';
     html += indicadorPanel('prioridad', 'Distribuci\u00f3n por prioridad', bodyPrioridad);
     html += indicadorPanel('sector', 'Distribuci\u00f3n por sector / m\u00e1quina', bodySector);
+    html += '</div>';
     html += indicadorPanel('motivos', 'Motivos de pausa m\u00e1s frecuentes', bodyMotivos);
     html += '<div id="indicadoresDetail"></div>';
 
