@@ -1789,20 +1789,32 @@ html += '</div>'; // cierre section-usuarios
     refreshIndicadores();
   }
 
+  function pollWithScrollPreserved(fn){
+    var x = window.scrollX, y = window.scrollY;
+    var result = fn();
+    if(result && typeof result.then === 'function'){
+      result.then(function(){ window.scrollTo(x, y); });
+    } else {
+      window.scrollTo(x, y);
+    }
+  }
+
   async function enterMode(newMode){
     mode = newMode;
     await loadTickets();
 
     if(mode === 'admin'){
       renderAdmin();
-      adminPollTimer = setInterval(adminRefreshFromStorage, 20000);
+      adminPollTimer = setInterval(function(){ pollWithScrollPreserved(adminRefreshFromStorage); }, 20000);
     } else {
       renderBoardSection();
-      boardPollTimer = setInterval(boardRefreshFromStorage, 45000);
+      boardPollTimer = setInterval(function(){ pollWithScrollPreserved(boardRefreshFromStorage); }, 45000);
       boardClockTimer = setInterval(function(){
         var syncEl = document.getElementById('syncNote');
         if(syncEl) updateSyncNote();
+        var __x = window.scrollX, __y = window.scrollY;
         renderBoardSection();
+        window.scrollTo(__x, __y);
       }, 15000);
     }
   }
