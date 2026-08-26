@@ -914,6 +914,8 @@
   var indicadoresLastList = [];
   var indicadorDetailOpen = null;
   var indicadoresCollapsed = {};
+  var indicadoresRangeList = [];
+  var indicadoresCurrentPersonaId = '';
 
   function buildAdminShell(){
     var app = document.getElementById('app');
@@ -1134,8 +1136,11 @@ html += '</div>'; // cierre section-usuarios
     var personaSel = document.getElementById('indicadorPersona');
     var personaId = personaSel ? personaSel.value : '';
     var personaUser = personaId ? state.users.find(function(u){ return u.id === personaId; }) : null;
-    var list = ticketsInRange(range);
+    var rangeList = ticketsInRange(range);
+    var list = rangeList;
     if(personaId){ list = list.filter(function(t){ return t.asignadoA === personaId; }); }
+    indicadoresRangeList = rangeList;
+    indicadoresCurrentPersonaId = personaId;
     var subtitleEl = document.getElementById('indicadoresSubtitle');
     if(subtitleEl){ subtitleEl.textContent = 'Mostrando: ' + (personaUser ? personaUser.nombre : 'todo el equipo'); }
 
@@ -1160,6 +1165,13 @@ html += '</div>'; // cierre section-usuarios
       }
     });
     var avgPausa = todasLasPausas.length ? todasLasPausas.reduce(function(sum,d){ return sum + d; }, 0) / todasLasPausas.length : null;
+
+    var completadasDeOtros = 0;
+    if(personaId && personaUser){
+      completadasDeOtros = rangeList.filter(function(t){
+        return t.estado === 'Terminada' && t.terminadoPor === personaUser.nombre && t.asignadoA !== personaId;
+      }).length;
+    }
 
     var prioridadCount = { 'Urgente':0,'Alta':0,'Media':0,'Baja':0 };
     list.forEach(function(t){ prioridadCount[t.prioridad] = (prioridadCount[t.prioridad]||0) + 1; });
@@ -1186,6 +1198,9 @@ html += '</div>'; // cierre section-usuarios
     bodyTotales += statCard('Activas', activas, null, 'estado', 'activas');
     bodyTotales += statCard('Pausadas', pausadas, null, 'estado', 'pausadas');
     bodyTotales += statCard('Completadas', completadas, null, 'estado', 'completadas');
+    if(personaId && personaUser){
+      bodyTotales += statCard('Completadas de otros', completadasDeOtros, 'no asignadas a ' + personaUser.nombre, 'completadasotros', personaUser.nombre);
+    }
     bodyTotales += '</div>';
 
     var bodyTiempos = '<div class="indicadores-stats-row">';
@@ -1287,6 +1302,11 @@ html += '</div>'; // cierre section-usuarios
     } else if(type === 'pausasconteo'){
       subset = indicadoresLastList.filter(function(t){ return t.historialPausas && t.historialPausas.length > 0; });
       label = 'Con pausas registradas';
+    } else if(type === 'completadasotros'){
+      subset = indicadoresRangeList.filter(function(t){
+        return t.estado === 'Terminada' && t.terminadoPor === value && t.asignadoA !== indicadoresCurrentPersonaId;
+      });
+      label = 'Completadas por ' + value + ' (no asignadas a ' + value + ')';
     }
 
     var html = '<div class="panel" id="indicadorDetailPanel">';
