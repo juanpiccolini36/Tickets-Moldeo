@@ -201,5 +201,22 @@
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mtbkli6xiblmm",
+    "sector": "M-110",
+    "tarea": "Colocar matriz de PP22218 - 03/002867 del Palet nº156.",
+    "detalle": "Dejar la maquina encendida para comenzar la producción.",
+    "prioridad": "Alta",
+    "estado": "Pendiente",
+    "creado": 1787838021465,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
