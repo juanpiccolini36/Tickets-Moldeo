@@ -259,7 +259,7 @@
     "tarea": "Guardar matriz de botazo inyectado en el Palet nº143 ubicado en la estanteria de Moldeo espacio D3.",
     "detalle": "Envolver el palet y llevarlo al espacio correspondiente de la estanteria exterior.",
     "prioridad": "Baja",
-    "estado": "Pausada",
+    "estado": "En curso",
     "creado": 1787838394799,
     "iniciadoEn": 1787839483769,
     "terminadoEn": null,
@@ -274,7 +274,7 @@
         "pausadoEn": 1787839521479,
         "motivo": "laburo urgente herreria.",
         "pausadoPor": "Pablo Diaz",
-        "reanudadoEn": null
+        "reanudadoEn": 1787839526485
       }
     ]
   },
