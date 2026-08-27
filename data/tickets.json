@@ -286,5 +286,22 @@
     "terminadoPor": null,
     "asignadoA": "u_mt00km7t",
     "asignadoANombre": "Pablo Diaz"
+  },
+  {
+    "id": "tk_mtblfh2r3kja8",
+    "sector": "Poliuretano",
+    "tarea": "Llevar piezas a Terminacion.",
+    "detalle": "",
+    "prioridad": "Baja",
+    "estado": "Pendiente",
+    "creado": 1787839419699,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Giacosa",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_mt00km7t",
+    "asignadoANombre": "Pablo Diaz"
   }
 ]
