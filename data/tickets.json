@@ -235,5 +235,22 @@
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mtbkqu2hhfuhu",
+    "sector": "M-57",
+    "tarea": "Fabricar anclaje para bandera que se encuentra en el patio de Moldeo. Volver a colocar todo con un caño nuevo mas alto que el original.",
+    "detalle": "",
+    "prioridad": "Baja",
+    "estado": "Pendiente",
+    "creado": 1787838270137,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
