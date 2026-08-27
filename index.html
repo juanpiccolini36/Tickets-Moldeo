@@ -372,7 +372,52 @@
   .pie-chart-legend .count-pill{ padding:4px 8px; }
   .pie-chart-pct{ color:var(--text-dim); font-weight:400; }
   .indicador-panel-body{ margin-top:4px; }
-/* rebuild-trigger-1787765231711 */
+
+  /* ---------- RESPONSIVE (celular / tablet) ---------- */
+  @media (max-width: 860px){
+    .board-header{ flex-wrap:wrap; gap:8px; padding:10px 14px; }
+    .board-logo{ height:26px; }
+    .board-header-right{ flex-wrap:wrap; gap:8px; justify-content:flex-end; }
+    .current-user-badge{ font-size:12px; padding:6px 10px; }
+    .board-nav label{ display:none; }
+    .board-nav select{ font-size:12px; padding:6px 8px; }
+    .theme-toggle-btn{ font-size:12px; padding:6px 10px; }
+    .logout-link-inline{ font-size:12px; padding:6px 10px; }
+
+    .board-main{ padding:14px 12px 32px; }
+    .admin-wrap{ padding:14px 12px 32px; }
+    .panel{ padding:16px 14px; }
+
+    .board-content-row{ flex-direction:column; }
+    .board-summary-col{ width:100%; }
+
+    .form-row-flex{ flex-direction:column; }
+    .form-row-flex > .panel{ width:100%; min-width:0; }
+
+    .form-grid{ grid-template-columns:1fr; }
+    .admin-edit-grid{ grid-template-columns:1fr; }
+
+    .indicadores-cols{ flex-direction:column; }
+    .indicadores-cols > .panel{ min-width:0; }
+    .indicadores-stats-row{ flex-wrap:wrap; }
+    .stat-card{ min-width:calc(50% - 8px); }
+    .indicadores-toolbar{ flex-wrap:wrap; gap:10px; }
+    .indicadores-filters{ width:100%; }
+    .indicadores-filters select{ flex:1; }
+
+    .pie-chart-row{ flex-direction:column; align-items:center; text-align:center; }
+    .pie-chart-svg{ width:170px; height:170px; }
+    .pie-chart-legend{ width:100%; }
+
+    .board-table td, .board-table th{ font-size:13px; padding:8px 10px; white-space:nowrap; }
+    .board-table td.tarea-cell, .board-table td.detalle-cell{ max-width:160px; }
+
+    .login-card{ max-width:100%; padding:32px 22px; margin:0 14px; }
+    .login-logo{ width:170px; }
+
+    .workload-row{ flex-direction:column; }
+    .workload-summary-col{ width:100%; }
+  }
 </style>
 </head>
 <body>
