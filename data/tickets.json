@@ -269,5 +269,22 @@
     "terminadoPor": null,
     "asignadoA": "u_mt00jxsx",
     "asignadoANombre": "Martin Coronel"
+  },
+  {
+    "id": "tk_mtbleadvye7nu",
+    "sector": "Poliuretano",
+    "tarea": "Sacar juntas Unipar para poscura.",
+    "detalle": "Llevar a Moldeo.",
+    "prioridad": "Alta",
+    "estado": "Pendiente",
+    "creado": 1787839364371,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Giacosa",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_mt00km7t",
+    "asignadoANombre": "Pablo Diaz"
   }
 ]
