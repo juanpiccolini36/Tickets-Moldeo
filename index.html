@@ -39,12 +39,14 @@
     --text-dim:#6B7280;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0; padding:0; height:100%;}
+  html,body{margin:0; padding:0; height:100%; -webkit-text-size-adjust:100%; text-size-adjust:100%;}
   body{
     background:var(--bg);
     color:var(--text);
     font-family:'Nunito',-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
     min-height:100vh;
+    overflow-x:hidden;
+    width:100%;
   }
   .mono{ font-family:'Consolas','SF Mono',Menlo,monospace; letter-spacing:0.02em; }
   .display{ font-family:'Arial Narrow',-apple-system,'Segoe UI',sans-serif; font-weight:800; letter-spacing:0.01em; }
