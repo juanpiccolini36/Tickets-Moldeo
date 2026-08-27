@@ -1,0 +1,21 @@
+{
+  "name": "Sistema de gestión de O.T. — Sector Moldeo",
+  "short_name": "O.T. Moldeo",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#15191D",
+  "theme_color": "#15191D",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
