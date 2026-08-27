@@ -218,5 +218,22 @@
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mtbkmxqopxag7",
+    "sector": "M-414",
+    "tarea": "Colocar matriz de PP22226 - 03/002915 Palet nº157.",
+    "detalle": "Controlar que los slots colocados sean los correctos junto con las placas posicionadoras de cerámica.",
+    "prioridad": "Urgente",
+    "estado": "Pendiente",
+    "creado": 1787838088272,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
