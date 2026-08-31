@@ -1879,6 +1879,20 @@ html += '</div>'; // cierre section-usuarios
   function init(){
     applyStoredTheme();
     renderLogin();
+    setupZoomGuard();
+  }
+
+  function setupZoomGuard(){
+    var vp = document.querySelector('meta[name="viewport"]');
+    if(!vp) return;
+    var normal = 'width=device-width, initial-scale=1.0';
+    var locked = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+    document.addEventListener('focusin', function(e){
+      if(e.target.matches && e.target.matches('input, select, textarea')){ vp.setAttribute('content', locked); }
+    });
+    document.addEventListener('focusout', function(e){
+      if(e.target.matches && e.target.matches('input, select, textarea')){ vp.setAttribute('content', normal); }
+    });
   }
 
   init();
