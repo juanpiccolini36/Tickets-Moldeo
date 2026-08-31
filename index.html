@@ -158,11 +158,11 @@
   .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .form-grid .full{ grid-column:1 / -1; }
   label{ font-size:12px; color:var(--text-dim); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.03em; }
-  input[type=text], textarea, select{
+  input[type=text], input[type=password], textarea, select{
     width:100%; padding:10px 12px; background:var(--panel-2); border:1px solid var(--line);
-    border-radius:6px; color:var(--text); font-size:15px; font-family:inherit;
+    border-radius:6px; color:var(--text); font-size:16px; font-family:inherit;
   }
-  input[type=text]:focus, textarea:focus, select:focus{ outline:2px solid var(--accent); border-color:var(--accent); }
+  input[type=text]:focus, input[type=password]:focus, textarea:focus, select:focus{ outline:2px solid var(--accent); border-color:var(--accent); }
   textarea{ resize:vertical; min-height:60px; }
 
   .btn{
@@ -377,6 +377,8 @@
 
   /* ---------- RESPONSIVE (celular / tablet) ---------- */
   @media (max-width: 860px){
+    input, select, textarea{ font-size:16px !important; }
+
     .board-header{ flex-wrap:wrap; gap:8px; padding:10px 14px; }
     .board-logo{ height:26px; }
     .board-header-right{ flex-wrap:wrap; gap:8px; justify-content:flex-end; }
