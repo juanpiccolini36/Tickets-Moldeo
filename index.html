@@ -422,6 +422,9 @@
     .workload-row{ flex-direction:column; }
     .workload-summary-col{ width:100%; }
   }
+  .filter-bar{ display:flex; gap:10px; margin:12px 0 16px; flex-wrap:wrap; }
+  .filter-bar .filter-search{ flex:1; min-width:200px; }
+  .filter-bar select{ min-width:150px; }
 </style>
 </head>
 <body>
@@ -804,6 +807,34 @@
     if(boardSection === 'historial'){ renderHistorial(); } else { renderBoard(); }
   }
 
+  function applyTicketFilters(list, searchText, prioridad, estado){
+    var q = (searchText || '').trim().toLowerCase();
+    return list.filter(function(t){
+      if(prioridad && t.prioridad !== prioridad){ return false; }
+      if(estado && t.estado !== estado){ return false; }
+      if(q){
+        var haystack = [t.sector, t.tarea, t.detalle, t.creadoPor, t.asignadoANombre].filter(Boolean).join(' ').toLowerCase();
+        if(haystack.indexOf(q) === -1){ return false; }
+      }
+      return true;
+    });
+  }
+
+  function filterBarHtml(searchId, searchValue, searchPlaceholder, prioridadId, prioridadValue, estadoId, estadoValue){
+    var h = '<div class="filter-bar">';
+    h += '<input type="text" id="' + searchId + '" class="filter-search" placeholder="' + searchPlaceholder + '" value="' + escapeHtml(searchValue || '') + '">';
+    h += '<select id="' + prioridadId + '"><option value="">Todas las prioridades</option>';
+    ['Urgente','Alta','Media','Baja'].forEach(function(p){ h += '<option value="' + p + '"' + (p===prioridadValue?' selected':'') + '>' + p + '</option>'; });
+    h += '</select>';
+    if(estadoId){
+      h += '<select id="' + estadoId + '"><option value="">Todos los estados</option>';
+      ['Pendiente','En curso','Pausada','Terminada'].forEach(function(e2){ h += '<option value="' + e2 + '"' + (e2===estadoValue?' selected':'') + '>' + e2 + '</option>'; });
+      h += '</select>';
+    }
+    h += '</div>';
+    return h;
+  }
+
   function renderHistorial(){
     var app = document.getElementById('app');
     var allDone = visibleForRole(state.tickets.filter(function(t){ return t.estado === 'Terminada'; })).sort(function(a,b){ return b.terminadoEn - a.terminadoEn; });
@@ -811,8 +842,13 @@
     var html = renderBoardHeader();
     html += '<div class="board-main">';
     html += '<h2 class="section-title">Historial de \u00f3rdenes completadas</h2>';
-    if(allDone.length === 0){
+    html += filterBarHtml('historialSearch', historialFilterText, 'Buscar por sector, tarea, detalle, creado por o asignado...', 'historialFiltroPrioridad', historialFilterPrioridad, null, null);
+    var allDoneFull = allDone;
+    allDone = applyTicketFilters(allDone, historialFilterText, historialFilterPrioridad, '');
+    if(allDoneFull.length === 0){
       html += '<div class="empty-state"><div class="big">\u2014</div>Todav\u00eda no hay \u00f3rdenes completadas.</div>';
+    } else if(allDone.length === 0){
+      html += '<div class="empty-state"><div class="empty-state-title">Sin resultados para este filtro.</div></div>';
     } else {
       html += '<div class="board-table-wrap"><table class="board-table"><thead><tr>';
       html += '<th class="col-bar"></th><th>Prioridad</th><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Detalle</th><th>Creado por</th><th>Asignado a</th><th>Finalizado</th><th>Terminado por</th></tr></thead><tbody>';
@@ -836,6 +872,10 @@
     app.innerHTML = html;
     wireBoardHeader();
     wireTicketModalCells(app);
+    var hs = document.getElementById('historialSearch');
+    if(hs){ hs.oninput = function(){ historialFilterText = hs.value; renderHistorial(); setTimeout(function(){ var el = document.getElementById('historialSearch'); if(el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 0); }; }
+    var hp = document.getElementById('historialFiltroPrioridad');
+    if(hp){ hp.onchange = function(){ historialFilterPrioridad = hp.value; renderHistorial(); }; }
   }
 
   function visibleForRole(list){
@@ -987,6 +1027,15 @@
   var indicadoresCollapsed = {};
   var indicadoresRangeList = [];
   var indicadoresCurrentPersonaId = '';
+  var historialFilterText = '';
+  var historialFilterPrioridad = '';
+  var adminHistorialFilterText = '';
+  var adminHistorialFilterPrioridad = '';
+  var adminListFilterText = '';
+  var adminListFilterPrioridad = '';
+  var adminListFilterEstado = '';
+  var adminDoneFilterText = '';
+  var adminDoneFilterPrioridad = '';
 
   function buildAdminShell(){
     var app = document.getElementById('app');
@@ -1414,13 +1463,21 @@ html += '</div>'; // cierre section-usuarios
     var el = document.getElementById('adminHistorialList');
     if(!el) return;
     var miNombre = state.currentUser ? state.currentUser.nombre : '';
-    var mine = state.tickets.filter(function(t){ return t.estado === 'Terminada' && t.creadoPor === miNombre; })
+    var mineFull = state.tickets.filter(function(t){ return t.estado === 'Terminada' && t.creadoPor === miNombre; })
       .sort(function(a,b){ return b.terminadoEn - a.terminadoEn; });
-    if(mine.length === 0){
+    if(mineFull.length === 0){
       el.innerHTML = '<div style="color:var(--text-dim); font-size:14px;">Todav\u00eda no gener\u00e1ste O.T. completadas.</div>';
       return;
     }
-    var html = '<div class="board-table-wrap"><table class="board-table"><thead><tr>';
+    var mine = applyTicketFilters(mineFull, adminHistorialFilterText, adminHistorialFilterPrioridad, '');
+    var html = filterBarHtml('adminHistorialSearch', adminHistorialFilterText, 'Buscar por sector, tarea, detalle o asignado...', 'adminHistorialFiltroPrioridad', adminHistorialFilterPrioridad, null, null);
+    if(mine.length === 0){
+      html += '<div style="color:var(--text-dim); font-size:14px;">Sin resultados para este filtro.</div>';
+      el.innerHTML = html;
+      wireAdminHistorialFilters();
+      return;
+    }
+    html += '<div class="board-table-wrap"><table class="board-table"><thead><tr>';
     html += '<th class="col-bar"></th><th>Prioridad</th><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Detalle</th><th>Asignado a</th><th>Finalizado</th><th>Terminado por</th></tr></thead><tbody>';
     mine.forEach(function(t){
       html += '<tr>';
@@ -1437,15 +1494,34 @@ html += '</div>'; // cierre section-usuarios
     html += '</tbody></table></div>';
     el.innerHTML = html;
     wireTicketModalCells(el);
+    wireAdminHistorialFilters();
   }
 
-  function renderAdminList(containerId, list, isDone){
+  function wireAdminHistorialFilters(){
+    var s = document.getElementById('adminHistorialSearch');
+    if(s){ s.oninput = function(){ adminHistorialFilterText = s.value; refreshAdminHistorial(); setTimeout(function(){ var el2 = document.getElementById('adminHistorialSearch'); if(el2){ el2.focus(); el2.setSelectionRange(el2.value.length, el2.value.length); } }, 0); }; }
+    var p = document.getElementById('adminHistorialFiltroPrioridad');
+    if(p){ p.onchange = function(){ adminHistorialFilterPrioridad = p.value; refreshAdminHistorial(); }; }
+  }
+
+  function renderAdminList(containerId, listFull, isDone){
     var el = document.getElementById(containerId);
-    if(list.length === 0){
+    if(listFull.length === 0){
       el.innerHTML = '<div style="color:var(--text-dim); font-size:14px;">Nada para mostrar.</div>';
       return;
     }
-    var html = '<div class="board-table-wrap"><table class="board-table"><thead><tr>';
+    var filterText = isDone ? adminDoneFilterText : adminListFilterText;
+    var filterPrioridad = isDone ? adminDoneFilterPrioridad : adminListFilterPrioridad;
+    var filterEstado = isDone ? '' : adminListFilterEstado;
+    var list = applyTicketFilters(listFull, filterText, filterPrioridad, filterEstado);
+    var html = filterBarHtml(containerId + 'Search', filterText, 'Buscar por sector, tarea, detalle, creado por o asignado...', containerId + 'FiltroPrioridad', filterPrioridad, isDone ? null : (containerId + 'FiltroEstado'), filterEstado);
+    if(list.length === 0){
+      html += '<div style="color:var(--text-dim); font-size:14px;">Sin resultados para este filtro.</div>';
+      el.innerHTML = html;
+      wireAdminListFilters(containerId, isDone);
+      return;
+    }
+    html += '<div class="board-table-wrap"><table class="board-table"><thead><tr>';
     html += '<th class="col-bar"></th><th>Prioridad</th><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Detalle</th><th>Creado por</th><th>Asignado a</th><th>Estado</th><th>Cargado</th>';
     if(isDone){ html += '<th>Finalizado</th><th>Terminado por</th>'; }
     html += '<th>Acciones</th>';
@@ -1499,6 +1575,7 @@ html += '</div>'; // cierre section-usuarios
     el.innerHTML = html;
 
     wireTicketModalCells(el);
+    wireAdminListFilters(containerId, isDone);
     el.querySelectorAll('[data-edit]').forEach(function(btn){
       btn.onclick = function(){ editingTicketId = btn.getAttribute('data-edit'); refreshAdminLists(); };
     });
@@ -1561,6 +1638,21 @@ html += '</div>'; // cierre section-usuarios
         }
       };
     });
+  }
+
+  function wireAdminListFilters(containerId, isDone){
+    var s = document.getElementById(containerId + 'Search');
+    if(s){
+      s.oninput = function(){
+        if(isDone){ adminDoneFilterText = s.value; } else { adminListFilterText = s.value; }
+        refreshAdminLists();
+        setTimeout(function(){ var el2 = document.getElementById(containerId + 'Search'); if(el2){ el2.focus(); el2.setSelectionRange(el2.value.length, el2.value.length); } }, 0);
+      };
+    }
+    var p = document.getElementById(containerId + 'FiltroPrioridad');
+    if(p){ p.onchange = function(){ if(isDone){ adminDoneFilterPrioridad = p.value; } else { adminListFilterPrioridad = p.value; } refreshAdminLists(); }; }
+    var e = document.getElementById(containerId + 'FiltroEstado');
+    if(e){ e.onchange = function(){ adminListFilterEstado = e.value; refreshAdminLists(); }; }
   }
 
   
