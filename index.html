@@ -630,6 +630,19 @@
     return 'hace ' + days + 'd';
   }
 
+  function fromDatetimeLocal(str){
+    if(!str){ return null; }
+    var ms = new Date(str).getTime();
+    return isNaN(ms) ? null : ms;
+  }
+
+  function toDatetimeLocal(ms){
+    if(!ms){ return ''; }
+    var d = new Date(ms);
+    function pad(n){ return String(n).padStart(2,'0'); }
+    return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
   function escapeHtml(str){
     var d = document.createElement('div');
     d.innerText = str || '';
@@ -1451,6 +1464,8 @@ html += '</div>'; // cierre section-usuarios
         html += '  <select class="edit-estado">';
         ['Pendiente','En curso','Pausada','Terminada'].forEach(function(e2){ html += '<option' + (e2===t.estado?' selected':'') + '>' + e2 + '</option>'; });
         html += '  </select>';
+        html += '  <div><label style="display:block; font-size:11px; color:var(--text-dim); margin-bottom:4px;">Inicio</label><input type="datetime-local" class="edit-iniciado" value="' + toDatetimeLocal(t.iniciadoEn) + '"></div>';
+        html += '  <div><label style="display:block; font-size:11px; color:var(--text-dim); margin-bottom:4px;">Fin</label><input type="datetime-local" class="edit-terminado" value="' + toDatetimeLocal(t.terminadoEn) + '"></div>';
         html += '  <input type="text" class="edit-tarea" value="' + escapeHtml(t.tarea) + '" placeholder="Tarea">';
         html += '  <textarea class="edit-detalle" placeholder="Detalle (opcional)">' + escapeHtml(t.detalle||'') + '</textarea>';
         html += '</div>';
@@ -1499,6 +1514,8 @@ html += '</div>'; // cierre section-usuarios
         var detalle = row.querySelector('.edit-detalle').value.trim();
         var nuevaPrioridad = row.querySelector('.edit-prioridad').value;
         var nuevoEstado = row.querySelector('.edit-estado').value;
+        var nuevoIniciado = fromDatetimeLocal(row.querySelector('.edit-iniciado').value);
+        var nuevoTerminado = fromDatetimeLocal(row.querySelector('.edit-terminado').value);
         if(!sector || !tarea){ alert('Sector/M\u00e1quina y Tarea no pueden quedar vac\u00edos.'); return; }
         var tActual = state.tickets.find(function(x){ return x.id === id; });
         var estadoCambio = tActual && tActual.estado !== nuevoEstado;
@@ -1507,7 +1524,7 @@ html += '</div>'; // cierre section-usuarios
         if(estadoCambio && nuevoEstado === 'Pausada'){
           await saveTicketsSafely(function(){
             var tt = state.tickets.find(function(x){ return x.id === id; });
-            if(tt){ tt.sector = sector; tt.tarea = tarea; tt.detalle = detalle; tt.prioridad = nuevaPrioridad; }
+            if(tt){ tt.sector = sector; tt.tarea = tarea; tt.detalle = detalle; tt.prioridad = nuevaPrioridad; tt.iniciadoEn = nuevoIniciado; tt.terminadoEn = nuevoTerminado; }
           });
           editingTicketId = null;
           openPauseReasonModal(id);
@@ -1517,7 +1534,7 @@ html += '</div>'; // cierre section-usuarios
         await saveTicketsSafely(function(){
           var tt = state.tickets.find(function(x){ return x.id === id; });
           if(!tt) return;
-          tt.sector = sector; tt.tarea = tarea; tt.detalle = detalle; tt.prioridad = nuevaPrioridad;
+          tt.sector = sector; tt.tarea = tarea; tt.detalle = detalle; tt.prioridad = nuevaPrioridad; tt.iniciadoEn = nuevoIniciado; tt.terminadoEn = nuevoTerminado;
           if(estadoCambio){
             tt.estado = nuevoEstado;
             if(nuevoEstado === 'Terminada'){ tt.terminadoEn = Date.now(); tt.terminadoPor = state.currentUser ? state.currentUser.nombre : ''; }
