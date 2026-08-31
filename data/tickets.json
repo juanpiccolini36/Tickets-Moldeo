@@ -311,5 +311,22 @@
     "terminadoPor": null,
     "asignadoA": "u_mt00km7t",
     "asignadoANombre": "Pablo Diaz"
+  },
+  {
+    "id": "tk_mth98wmoebmhw",
+    "sector": "M-414",
+    "tarea": "Retirar matriz de PP22226 y guardarla en el palet nº157.",
+    "detalle": "",
+    "prioridad": "Media",
+    "estado": "Pendiente",
+    "creado": 1788181754928,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
