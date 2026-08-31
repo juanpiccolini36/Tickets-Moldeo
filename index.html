@@ -1792,8 +1792,8 @@ html += '</div>'; // cierre section-usuarios
     html += '  <h1 class="login-title">Sistema de gesti\u00f3n de O.T.</h1>';
     html += '  <p class="login-sub">Ingres\u00e1 con tu usuario para continuar</p>';
     html += '  <div class="err">' + (errorMsg ? escapeHtml(errorMsg) : '') + '</div>';
-    html += '  <label>Usuario</label><input type="text" id="l_user" name="ot_user_field" autocomplete="off" readonly onfocus="this.removeAttribute(\'readonly\')">';
-    html += '  <label>Contrase\u00f1a</label><input type="password" id="l_pass" name="ot_pass_field" autocomplete="off" readonly onfocus="this.removeAttribute(\'readonly\')">';
+    html += '  <label>Usuario</label><input type="text" id="l_user" name="ot_user_field" autocomplete="off">';
+    html += '  <label>Contrase\u00f1a</label><input type="password" id="l_pass" name="ot_pass_field" autocomplete="off">';
     html += '  <button class="btn btn-primary login-btn" id="btnLogin">Ingresar</button>';
     html += '</div></div>';
     app.innerHTML = html;
