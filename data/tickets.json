@@ -328,5 +328,22 @@
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mth9at8288rxp",
+    "sector": "M-414",
+    "tarea": "Colocar matriz de PP22111 luego de fabricarla.",
+    "detalle": "",
+    "prioridad": "Alta",
+    "estado": "Pendiente",
+    "creado": 1788181843826,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
