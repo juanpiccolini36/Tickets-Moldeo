@@ -1544,6 +1544,9 @@ html += '</div>'; // cierre section-usuarios
         html += '  <select class="edit-estado">';
         ['Pendiente','En curso','Pausada','Terminada'].forEach(function(e2){ html += '<option' + (e2===t.estado?' selected':'') + '>' + e2 + '</option>'; });
         html += '  </select>';
+        html += '  <div><label style="display:block; font-size:11px; color:var(--text-dim); margin-bottom:4px;">Terminado por</label><select class="edit-terminadopor"><option value="">(Yo mismo)</option>';
+        state.users.forEach(function(u){ html += '<option value="' + escapeHtml(u.nombre) + '"' + (u.nombre === (t.terminadoPor || t.asignadoANombre) ? ' selected' : '') + '>' + escapeHtml(u.nombre) + '</option>'; });
+        html += '</select></div>';
         html += '  <div><label style="display:block; font-size:11px; color:var(--text-dim); margin-bottom:4px;">Inicio</label><input type="datetime-local" class="edit-iniciado" value="' + toDatetimeLocal(t.iniciadoEn) + '"></div>';
         html += '  <div><label style="display:block; font-size:11px; color:var(--text-dim); margin-bottom:4px;">Fin</label><input type="datetime-local" class="edit-terminado" value="' + toDatetimeLocal(t.terminadoEn) + '"></div>';
         html += '  <input type="text" class="edit-tarea" value="' + escapeHtml(t.tarea) + '" placeholder="Tarea">';
@@ -1597,6 +1600,7 @@ html += '</div>'; // cierre section-usuarios
         var nuevoEstado = row.querySelector('.edit-estado').value;
         var nuevoIniciado = fromDatetimeLocal(row.querySelector('.edit-iniciado').value);
         var nuevoTerminado = fromDatetimeLocal(row.querySelector('.edit-terminado').value);
+        var nuevoTerminadoPor = row.querySelector('.edit-terminadopor').value;
         if(!sector || !tarea){ alert('Sector/M\u00e1quina y Tarea no pueden quedar vac\u00edos.'); return; }
         var tActual = state.tickets.find(function(x){ return x.id === id; });
         var estadoCambio = tActual && tActual.estado !== nuevoEstado;
@@ -1618,7 +1622,7 @@ html += '</div>'; // cierre section-usuarios
           tt.sector = sector; tt.tarea = tarea; tt.detalle = detalle; tt.prioridad = nuevaPrioridad; tt.iniciadoEn = nuevoIniciado; tt.terminadoEn = nuevoTerminado;
           if(estadoCambio){
             tt.estado = nuevoEstado;
-            if(nuevoEstado === 'Terminada'){ tt.terminadoEn = Date.now(); tt.terminadoPor = state.currentUser ? state.currentUser.nombre : ''; }
+            if(nuevoEstado === 'Terminada'){ tt.terminadoEn = Date.now(); tt.terminadoPor = nuevoTerminadoPor || (state.currentUser ? state.currentUser.nombre : ''); }
             if(nuevoEstado === 'En curso'){
               if(!tt.iniciadoEn){ tt.iniciadoEn = Date.now(); }
               tt.iniciadoPor = state.currentUser ? state.currentUser.nombre : '';
@@ -1628,7 +1632,7 @@ html += '</div>'; // cierre section-usuarios
               }
             }
             if(nuevoEstado === 'Pendiente'){ tt.terminadoEn = null; }
-          }
+          } else if(tt.estado === 'Terminada' && nuevoTerminadoPor){ tt.terminadoPor = nuevoTerminadoPor; }
         });
         editingTicketId = null;
         refreshAdminLists();
