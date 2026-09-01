@@ -187,23 +187,6 @@
     "asignadoANombre": "Diego Pintos"
   },
   {
-    "id": "tk_mthbxqynhl34e",
-    "sector": "M-30",
-    "tarea": "Fabricar matriz para PP20865 según plano a mano. Colocar en la prensa y dejar calentando para produccion.",
-    "detalle": "",
-    "prioridad": "Urgente",
-    "estado": "Pendiente",
-    "creado": 1788186273215,
-    "iniciadoEn": null,
-    "terminadoEn": null,
-    "pausadoEn": null,
-    "creadoPor": "Juan Piccolini",
-    "iniciadoPor": null,
-    "terminadoPor": null,
-    "asignadoA": "u_msyt2us4",
-    "asignadoANombre": "Diego Pintos"
-  },
-  {
     "id": "tk_mthcnx1f9lzbl",
     "sector": "M-47",
     "tarea": "Colocar matriz de PP21863 - Palet nº232 Cantera Cerro Federacion.",
