@@ -673,6 +673,8 @@
     html += '<div class="modal-body">';
     html += '  <label class="modal-label" style="display:block; margin-bottom:8px;">Describ\u00ed brevemente por qu\u00e9 se pausa esta tarea</label>';
     html += '  <textarea id="pauseReasonInput" placeholder="Ej: Falta repuesto, esperando otra tarea, etc." rows="4"></textarea>';
+    html += '  <label class="modal-label" style="display:block; margin:14px 0 8px;">Inicio de la pausa</label>';
+    html += '  <input type="datetime-local" id="pauseStartInput" value="' + toDatetimeLocal(Date.now()) + '">';
     html += '  <div class="btn-row" style="margin-top:16px;"><button class="btn btn-ghost" id="pauseCancelBtn">Cancelar</button><button class="btn btn-primary" id="pauseConfirmBtn">Confirmar pausa</button></div>';
     html += '</div>';
     card.innerHTML = html;
@@ -686,18 +688,20 @@
       if(!motivo){ alert('Ingres\u00e1 un motivo antes de confirmar.'); return; }
       var btn = document.getElementById('pauseConfirmBtn');
       btn.disabled = true; btn.textContent = 'Guardando...';
-      await pausarTicket(id, motivo);
+      var inicioStr = document.getElementById('pauseStartInput').value;
+      var inicioMs = fromDatetimeLocal(inicioStr) || Date.now();
+      await pausarTicket(id, motivo, inicioMs);
       overlay.remove();
     };
     document.getElementById('pauseReasonInput').focus();
   }
 
-  async function pausarTicket(id, motivo){
+  async function pausarTicket(id, motivo, pausadoEnCustom){
     await saveTicketsSafely(function(){
       var t = state.tickets.find(function(x){ return x.id === id; });
       if(!t) return;
       t.estado = 'Pausada';
-      t.pausadoEn = Date.now();
+      t.pausadoEn = pausadoEnCustom || Date.now();
       if(!t.historialPausas){ t.historialPausas = []; }
       t.historialPausas.push({ pausadoEn: Date.now(), motivo: motivo, pausadoPor: state.currentUser ? state.currentUser.nombre : '', reanudadoEn: null });
     });
