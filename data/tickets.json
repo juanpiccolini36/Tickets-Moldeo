@@ -191,7 +191,7 @@
     "tarea": "Sacar matriz de Ceramicas con imanes 03/003033 y guardarla en el Palet nº143.",
     "detalle": "",
     "prioridad": "Alta",
-    "estado": "Pausada",
+    "estado": "En curso",
     "creado": 1787837916496,
     "iniciadoEn": 1788171300000,
     "terminadoEn": null,
@@ -212,7 +212,7 @@
         "pausadoEn": 1788265440000,
         "motivo": "Espera de autoelevador.",
         "pausadoPor": "Juan Piccolini",
-        "reanudadoEn": null
+        "reanudadoEn": 1788265528924
       }
     ]
   },
