@@ -703,7 +703,7 @@
       t.estado = 'Pausada';
       t.pausadoEn = pausadoEnCustom || Date.now();
       if(!t.historialPausas){ t.historialPausas = []; }
-      t.historialPausas.push({ pausadoEn: Date.now(), motivo: motivo, pausadoPor: state.currentUser ? state.currentUser.nombre : '', reanudadoEn: null });
+      t.historialPausas.push({ pausadoEn: t.pausadoEn, motivo: motivo, pausadoPor: state.currentUser ? state.currentUser.nombre : '', reanudadoEn: null });
     });
     if(mode === 'admin'){ refreshAdminLists(); } else { renderBoardSection(); }
   }
