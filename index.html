@@ -425,6 +425,8 @@
   .filter-bar{ display:flex; gap:10px; margin:12px 0 16px; flex-wrap:wrap; }
   .filter-bar .filter-search{ flex:1 1 220px; min-width:200px; width:auto; }
   .filter-bar select{ flex:0 1 170px; min-width:150px; width:auto; }
+  .hist-delete-toolbar{ display:flex; gap:10px; margin:-6px 0 14px; }
+  .hist-select-cb, #adminHistorialSelectAll{ width:16px; height:16px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -1035,6 +1037,8 @@
   var historialFilterPrioridad = '';
   var adminHistorialFilterText = '';
   var adminHistorialFilterPrioridad = '';
+  var adminHistorialDeleteMode = false;
+  var adminHistorialSelectedIds = {};
   var adminListFilterText = '';
   var adminListFilterPrioridad = '';
   var adminListFilterEstado = '';
@@ -1475,17 +1479,28 @@ html += '</div>'; // cierre section-usuarios
     }
     var mine = applyTicketFilters(mineFull, adminHistorialFilterText, adminHistorialFilterPrioridad, '');
     var html = filterBarHtml('adminHistorialSearch', adminHistorialFilterText, 'Buscar por sector, tarea, detalle o asignado...', 'adminHistorialFiltroPrioridad', adminHistorialFilterPrioridad, null, null);
+    html += '<div class="hist-delete-toolbar">';
+    if(adminHistorialDeleteMode){
+      var selCount = Object.keys(adminHistorialSelectedIds).filter(function(k){ return adminHistorialSelectedIds[k]; }).length;
+      html += '<button class="btn btn-ghost" id="adminHistorialCancelDelete">Cancelar</button>';
+      html += '<button class="btn btn-danger" id="adminHistorialConfirmDelete"' + (selCount === 0 ? ' disabled' : '') + '>Eliminar seleccionadas (' + selCount + ')</button>';
+    } else {
+      html += '<button class="btn btn-ghost" id="adminHistorialDeleteToggle">Eliminar\u2026</button>';
+    }
+    html += '</div>';
     if(mine.length === 0){
       html += '<div style="color:var(--text-dim); font-size:14px;">Sin resultados para este filtro.</div>';
       el.innerHTML = html;
       wireAdminHistorialFilters();
+      wireAdminHistorialDelete();
       return;
     }
     html += '<div class="board-table-wrap"><table class="board-table"><thead><tr>';
-    html += '<th class="col-bar"></th><th>Prioridad</th><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Detalle</th><th>Asignado a</th><th>Finalizado</th><th>Terminado por</th></tr></thead><tbody>';
+    html += '<th class="col-bar"></th>' + (adminHistorialDeleteMode ? '<th><input type="checkbox" id="adminHistorialSelectAll"></th>' : '') + '<th>Prioridad</th><th>Sector / M\u00e1quina</th><th>Tarea</th><th>Detalle</th><th>Asignado a</th><th>Finalizado</th><th>Terminado por</th></tr></thead><tbody>';
     mine.forEach(function(t){
       html += '<tr>';
       html += '<td class="col-bar" style="background:' + PRIORITY_COLOR[t.prioridad] + '"></td>';
+      if(adminHistorialDeleteMode){ html += '<td><input type="checkbox" class="hist-select-cb" data-id="' + t.id + '"' + (adminHistorialSelectedIds[t.id] ? ' checked' : '') + '></td>'; }
       html += '<td><span class="badge" style="background:' + PRIORITY_COLOR[t.prioridad] + '22; color:' + PRIORITY_COLOR[t.prioridad] + '; border:1px solid ' + PRIORITY_COLOR[t.prioridad] + '">' + t.prioridad + '</span></td>';
       html += '<td class="sector-cell">' + escapeHtml(t.sector) + '</td>';
       html += '<td class="tarea-cell" data-ticketid="' + t.id + '">' + escapeHtml(t.tarea) + '</td>';
@@ -1499,6 +1514,68 @@ html += '</div>'; // cierre section-usuarios
     el.innerHTML = html;
     wireTicketModalCells(el);
     wireAdminHistorialFilters();
+    wireAdminHistorialDelete();
+  }
+
+  function updateHistDeleteCount(){
+    var selCount = Object.keys(adminHistorialSelectedIds).filter(function(k){ return adminHistorialSelectedIds[k]; }).length;
+    var btn = document.getElementById('adminHistorialConfirmDelete');
+    if(btn){ btn.textContent = 'Eliminar seleccionadas (' + selCount + ')'; btn.disabled = selCount === 0; }
+  }
+
+  async function deleteTicketsBulk(ids){
+    await saveTicketsSafely(function(){
+      state.tickets = state.tickets.filter(function(x){ return ids.indexOf(x.id) === -1; });
+    });
+  }
+
+  function wireAdminHistorialDelete(){
+    var toggleBtn = document.getElementById('adminHistorialDeleteToggle');
+    if(toggleBtn){
+      toggleBtn.onclick = function(){
+        adminHistorialDeleteMode = true;
+        adminHistorialSelectedIds = {};
+        refreshAdminHistorial();
+      };
+    }
+    var cancelBtn = document.getElementById('adminHistorialCancelDelete');
+    if(cancelBtn){
+      cancelBtn.onclick = function(){
+        adminHistorialDeleteMode = false;
+        adminHistorialSelectedIds = {};
+        refreshAdminHistorial();
+      };
+    }
+    var confirmBtn = document.getElementById('adminHistorialConfirmDelete');
+    if(confirmBtn){
+      confirmBtn.onclick = async function(){
+        var ids = Object.keys(adminHistorialSelectedIds).filter(function(k){ return adminHistorialSelectedIds[k]; });
+        if(ids.length === 0){ return; }
+        if(!confirm('\u00bfEliminar ' + ids.length + ' O.T. definitivamente? Esta acci\u00f3n no se puede deshacer.')){ return; }
+        confirmBtn.disabled = true; confirmBtn.textContent = 'Eliminando...';
+        await deleteTicketsBulk(ids);
+        adminHistorialDeleteMode = false;
+        adminHistorialSelectedIds = {};
+        refreshAdminHistorial();
+        refreshIndicadores();
+      };
+    }
+    var selectAll = document.getElementById('adminHistorialSelectAll');
+    if(selectAll){
+      selectAll.onchange = function(){
+        document.querySelectorAll('.hist-select-cb').forEach(function(cb){
+          cb.checked = selectAll.checked;
+          adminHistorialSelectedIds[cb.getAttribute('data-id')] = selectAll.checked;
+        });
+        updateHistDeleteCount();
+      };
+    }
+    document.querySelectorAll('.hist-select-cb').forEach(function(cb){
+      cb.onchange = function(){
+        adminHistorialSelectedIds[cb.getAttribute('data-id')] = cb.checked;
+        updateHistDeleteCount();
+      };
+    });
   }
 
   function wireAdminHistorialFilters(){
