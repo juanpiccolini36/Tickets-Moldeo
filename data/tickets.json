@@ -43,31 +43,6 @@
     "asignadoANombre": "Diego Pintos"
   },
   {
-    "id": "tk_mt00lt1p21wd5",
-    "sector": "Poliuretano",
-    "tarea": "Traer matriz nº200 al sector y dejarla en espacio D2 de estanteria.",
-    "detalle": "",
-    "prioridad": "Baja",
-    "estado": "Terminada",
-    "creado": 1787139315277,
-    "iniciadoEn": 1787357640000,
-    "terminadoEn": 1788268520264,
-    "pausadoEn": 1787357680203,
-    "creadoPor": "Juan Piccolini",
-    "iniciadoPor": "Juan Piccolini",
-    "terminadoPor": "Martin Coronel",
-    "asignadoA": "u_mt00jxsx",
-    "asignadoANombre": "Martin Coronel",
-    "historialPausas": [
-      {
-        "pausadoEn": 1787357680203,
-        "motivo": "Falta de ganas",
-        "pausadoPor": "Martin Coronel",
-        "reanudadoEn": 1787357684569
-      }
-    ]
-  },
-  {
     "id": "tk_mt00n68usteso",
     "sector": "Moldeo",
     "tarea": "Traer palet nº206 y dejarlo en el puesto de trabajo de Matriceria.",
@@ -215,23 +190,6 @@
         "reanudadoEn": 1788265528924
       }
     ]
-  },
-  {
-    "id": "tk_mtbkli6xiblmm",
-    "sector": "M-110",
-    "tarea": "Colocar matriz de PP22218 - 03/002867 del Palet nº156.",
-    "detalle": "Dejar la maquina encendida para comenzar la producción.",
-    "prioridad": "Alta",
-    "estado": "Terminada",
-    "creado": 1787838021465,
-    "iniciadoEn": null,
-    "terminadoEn": 1788265920000,
-    "pausadoEn": null,
-    "creadoPor": "Juan Piccolini",
-    "iniciadoPor": null,
-    "terminadoPor": "Pablo Diaz",
-    "asignadoA": "u_msyt2us4",
-    "asignadoANombre": "Diego Pintos"
   },
   {
     "id": "tk_mtbkmxqopxag7",
