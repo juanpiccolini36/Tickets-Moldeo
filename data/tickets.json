@@ -158,16 +158,24 @@
     "tarea": "Colocar matriz de PP22111 luego de fabricarla.",
     "detalle": "",
     "prioridad": "Alta",
-    "estado": "Pendiente",
+    "estado": "Pausada",
     "creado": 1788181843826,
     "iniciadoEn": 1788170400000,
     "terminadoEn": 1788264900000,
-    "pausadoEn": null,
+    "pausadoEn": 1788203700000,
     "creadoPor": "Juan Piccolini",
     "iniciadoPor": null,
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
-    "asignadoANombre": "Diego Pintos"
+    "asignadoANombre": "Diego Pintos",
+    "historialPausas": [
+      {
+        "pausadoEn": 1788203700000,
+        "motivo": "Fin de turno",
+        "pausadoPor": "Juan Piccolini",
+        "reanudadoEn": null
+      }
+    ]
   },
   {
     "id": "tk_mth9bspxtlr4b",
