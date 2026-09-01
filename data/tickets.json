@@ -26,99 +26,6 @@
     "terminadoPor": "Diego Pintos"
   },
   {
-    "id": "tk_msz10zi2uucen",
-    "sector": "M-111",
-    "tarea": "Retirar matriz de cribas 80x40mm y guardarla en el palet nº245.",
-    "detalle": "Guardar todos los accesorios en el palet, laterales removibles, extractor y chapa superior.",
-    "prioridad": "Baja",
-    "estado": "Terminada",
-    "creado": 1787079557306,
-    "iniciadoEn": 1787079636075,
-    "terminadoEn": 1787079666804,
-    "pausadoEn": 1787079642024,
-    "creadoPor": "Juan Piccolini",
-    "iniciadoPor": "Diego Pintos",
-    "terminadoPor": "Diego Pintos",
-    "asignadoA": "u_msyt2us4",
-    "asignadoANombre": "Diego Pintos"
-  },
-  {
-    "id": "tk_mt00n68usteso",
-    "sector": "Moldeo",
-    "tarea": "Traer palet nº206 y dejarlo en el puesto de trabajo de Matriceria.",
-    "detalle": "",
-    "prioridad": "Media",
-    "estado": "Terminada",
-    "creado": 1787139379038,
-    "iniciadoEn": 1787236112399,
-    "terminadoEn": 1787236188219,
-    "pausadoEn": 1787236171635,
-    "creadoPor": "Juan Piccolini",
-    "iniciadoPor": "Martin Coronel",
-    "terminadoPor": "Martin Coronel",
-    "asignadoA": "u_mt00jxsx",
-    "asignadoANombre": "Martin Coronel",
-    "historialPausas": [
-      {
-        "pausadoEn": 1787236171636,
-        "motivo": "No se encuentra el palet donde indica el sistema. Se frena la busqueda hasta confirmar la posicion.",
-        "pausadoPor": "Martin Coronel",
-        "reanudadoEn": 1787236177051
-      }
-    ]
-  },
-  {
-    "id": "tk_mt00qk0kmz96q",
-    "sector": "Poliuretano",
-    "tarea": "Traer matriz desde Herreria y dejarla en el sector para comenzar la produccion.",
-    "detalle": "",
-    "prioridad": "Alta",
-    "estado": "Terminada",
-    "creado": 1787139536852,
-    "iniciadoEn": 1787147331260,
-    "terminadoEn": 1787148966927,
-    "pausadoEn": 1787147339927,
-    "creadoPor": "Juan Piccolini",
-    "iniciadoPor": "Diego Pintos",
-    "terminadoPor": "Diego Pintos",
-    "asignadoA": "u_mt00jxsx",
-    "asignadoANombre": "Martin Coronel"
-  },
-  {
-    "id": "tk_mt00sx1e8m11q",
-    "sector": "M-242",
-    "tarea": "Sacar matriz de criba 600x600mm y guardar en el palet nº60.",
-    "detalle": "Envolver el palet y sacarlo al lugar correspondiente en el campo.",
-    "prioridad": "Media",
-    "estado": "Terminada",
-    "creado": 1787139647042,
-    "iniciadoEn": null,
-    "terminadoEn": 1787148952387,
-    "pausadoEn": null,
-    "creadoPor": "Juan Piccolini",
-    "iniciadoPor": null,
-    "terminadoPor": "Diego Pintos",
-    "asignadoA": "u_msyt2us4",
-    "asignadoANombre": "Diego Pintos"
-  },
-  {
-    "id": "tk_mt32tnoimxpdr",
-    "sector": "Moldeo",
-    "tarea": "Sacar palet nº52 y guardarlo en la estanteria correspondiente.",
-    "detalle": "",
-    "prioridad": "Baja",
-    "estado": "Terminada",
-    "creado": 1787324439330,
-    "iniciadoEn": 1787328202037,
-    "terminadoEn": 1787592776125,
-    "pausadoEn": null,
-    "creadoPor": "Juan Piccolini",
-    "iniciadoPor": "Martin Coronel",
-    "terminadoPor": "Martin Coronel",
-    "asignadoA": "u_mt00jxsx",
-    "asignadoANombre": "Martin Coronel"
-  },
-  {
     "id": "tk_mt34eg1vlx8zd",
     "sector": "Poliuretano",
     "tarea": "Sacar piezas del horno y llevarlas al sector de Pulido.",
@@ -161,37 +68,6 @@
     "asignadoANombre": "Diego Pintos"
   },
   {
-    "id": "tk_mtbkj974kuk4y",
-    "sector": "M-110",
-    "tarea": "Sacar matriz de Ceramicas con imanes 03/003033 y guardarla en el Palet nº143.",
-    "detalle": "",
-    "prioridad": "Alta",
-    "estado": "Terminada",
-    "creado": 1787837916496,
-    "iniciadoEn": 1788171300000,
-    "terminadoEn": 1788265538855,
-    "pausadoEn": 1788265440000,
-    "creadoPor": "Juan Piccolini",
-    "iniciadoPor": "Juan Piccolini",
-    "terminadoPor": "Juan Piccolini",
-    "asignadoA": "u_msyt2us4",
-    "asignadoANombre": "Diego Pintos",
-    "historialPausas": [
-      {
-        "pausadoEn": 1788261297331,
-        "motivo": "Fin de turno.",
-        "pausadoPor": "Juan Piccolini",
-        "reanudadoEn": 1788261311379
-      },
-      {
-        "pausadoEn": 1788265440000,
-        "motivo": "Espera de autoelevador.",
-        "pausadoPor": "Juan Piccolini",
-        "reanudadoEn": 1788265528924
-      }
-    ]
-  },
-  {
     "id": "tk_mtbkmxqopxag7",
     "sector": "M-414",
     "tarea": "Colocar matriz de PP22226 - 03/002915 Palet nº157.",
@@ -224,31 +100,6 @@
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
-  },
-  {
-    "id": "tk_mtbkti9bt8tjv",
-    "sector": "I-01",
-    "tarea": "Guardar matriz de botazo inyectado en el Palet nº143 ubicado en la estanteria de Moldeo espacio D3.",
-    "detalle": "Envolver el palet y llevarlo al espacio correspondiente de la estanteria exterior.",
-    "prioridad": "Baja",
-    "estado": "Terminada",
-    "creado": 1787838394799,
-    "iniciadoEn": 1787839483769,
-    "terminadoEn": 1787839530503,
-    "pausadoEn": 1787839521479,
-    "creadoPor": "Juan Piccolini",
-    "iniciadoPor": "Pablo Diaz",
-    "terminadoPor": "Pablo Diaz",
-    "asignadoA": "u_mt00jxsx",
-    "asignadoANombre": "Martin Coronel",
-    "historialPausas": [
-      {
-        "pausadoEn": 1787839521479,
-        "motivo": "laburo urgente herreria.",
-        "pausadoPor": "Pablo Diaz",
-        "reanudadoEn": 1787839526485
-      }
-    ]
   },
   {
     "id": "tk_mtbleadvye7nu",
