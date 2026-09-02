@@ -210,5 +210,22 @@
     "terminadoPor": "Diego Pintos",
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mtka8jk4nr7hp",
+    "sector": "I-01",
+    "tarea": "Fabricar cancamos M24 para levantar defensas Icone 500. Cantidad: 2",
+    "detalle": "",
+    "prioridad": "Media",
+    "estado": "Pendiente",
+    "creado": 1788364816132,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
