@@ -244,5 +244,22 @@
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mtkaa5gqnq2v5",
+    "sector": "M-241",
+    "tarea": "Sacar matriz de criba 590x610mm y guardarla en el Palet nº2.",
+    "detalle": "",
+    "prioridad": "Alta",
+    "estado": "Pendiente",
+    "creado": 1788364891178,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
