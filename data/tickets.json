@@ -227,5 +227,22 @@
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mtka994rcvxt3",
+    "sector": "M-124",
+    "tarea": "Colocar matriz de planchas para guardera 650mm x 10mm - PP22467.",
+    "detalle": "",
+    "prioridad": "Alta",
+    "estado": "Pendiente",
+    "creado": 1788364849275,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
