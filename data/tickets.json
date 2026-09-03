@@ -261,5 +261,22 @@
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mtlipfjo15m2p",
+    "sector": "M-123",
+    "tarea": "Colocar matriz de Piso Acarreador PP22371/372.",
+    "detalle": "Colocar de manera frontal pisando solo en el piston central. Comprobar que las cadenas tengan la altura necesaria y el extractor entre/salga correctamente.",
+    "prioridad": "Media",
+    "estado": "Pendiente",
+    "creado": 1788439507188,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
