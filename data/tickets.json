@@ -278,5 +278,22 @@
     "terminadoPor": "Diego Pintos",
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mtlog4w5tb5qe",
+    "sector": "I-01",
+    "tarea": "Reparar la matriz exterior de defensa Icone 500 por rajadura.",
+    "detalle": "Profundizar bien la zona, biselar correctamente y rellenar en varias pasadas. Flapear completa la zona para recuperar la forma original luego de soldar.",
+    "prioridad": "Urgente",
+    "estado": "Pendiente",
+    "creado": 1788449151173,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
