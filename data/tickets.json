@@ -268,14 +268,14 @@
     "tarea": "Colocar matriz de Piso Acarreador PP22371/372.",
     "detalle": "Colocar de manera frontal pisando solo en el piston central. Comprobar que las cadenas tengan la altura necesaria y el extractor entre/salga correctamente.",
     "prioridad": "Media",
-    "estado": "Pendiente",
+    "estado": "Terminada",
     "creado": 1788439507188,
-    "iniciadoEn": null,
-    "terminadoEn": null,
+    "iniciadoEn": 1788435000000,
+    "terminadoEn": 1788448682220,
     "pausadoEn": null,
     "creadoPor": "Juan Piccolini",
     "iniciadoPor": null,
-    "terminadoPor": null,
+    "terminadoPor": "Diego Pintos",
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
   }
