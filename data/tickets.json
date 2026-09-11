@@ -321,7 +321,7 @@
     "prioridad": "Alta",
     "estado": "Pendiente",
     "creado": 1789129021800,
-    "iniciadoEn": null,
+    "iniciadoEn": 1788865200000,
     "terminadoEn": null,
     "pausadoEn": null,
     "creadoPor": "Juan Piccolini",
