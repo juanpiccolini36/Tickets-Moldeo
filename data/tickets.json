@@ -397,5 +397,22 @@
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mtwxz78653hu2",
+    "sector": "Matriz",
+    "tarea": "Fabricar matriz para prueba de adhesión de iman 80x50x15mm.",
+    "detalle": "",
+    "prioridad": "Alta",
+    "estado": "Pendiente",
+    "creado": 1789130285142,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
