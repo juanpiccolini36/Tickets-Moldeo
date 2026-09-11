@@ -329,5 +329,22 @@
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mtwxaixyt0je1",
+    "sector": "M-47",
+    "tarea": "Colocar matriz de esfera y regular la altura de plato de prensa para permitir que entre toda la mitad inferior junto con el inserto + goma.",
+    "detalle": "",
+    "prioridad": "Urgente",
+    "estado": "Pendiente",
+    "creado": 1789129133926,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
