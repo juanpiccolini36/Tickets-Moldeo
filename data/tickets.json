@@ -380,5 +380,22 @@
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mtwxy9urpz0u4",
+    "sector": "M-57",
+    "tarea": "Colocar matriz de PP22218 - Pallet nº89.",
+    "detalle": "Soldar una chapa lisa para hacer de tapa.",
+    "prioridad": "Media",
+    "estado": "Pendiente",
+    "creado": 1789130241891,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
