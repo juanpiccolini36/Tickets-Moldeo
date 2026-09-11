@@ -431,5 +431,22 @@
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mtwy9owv3x3wm",
+    "sector": "Matriz rueda",
+    "tarea": "Reparar pisón de transferencia de rueda de auto elevador.",
+    "detalle": "Cortar chapa central nueva y llevar a mecanizado para hacer rosca. Luego armar todo en posicion y soldar biselando antes.",
+    "prioridad": "Urgente",
+    "estado": "Pendiente",
+    "creado": 1789130774623,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
