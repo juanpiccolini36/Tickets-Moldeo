@@ -550,5 +550,22 @@
     "terminadoPor": "Diego Pintos",
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mu1a2maz1k3zk",
+    "sector": "M-111",
+    "tarea": "Colocar matriz para PP22522/521 - Pallet nº245.",
+    "detalle": "Cambiar chapa de codigo y revisar que los laterales sean los que corresponden.",
+    "prioridad": "Alta",
+    "estado": "Pendiente",
+    "creado": 1789392464747,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
