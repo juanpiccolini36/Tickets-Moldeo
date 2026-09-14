@@ -516,5 +516,22 @@
     "terminadoPor": "Diego Pintos",
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mu186nofc948n",
+    "sector": "I-01",
+    "tarea": "Soldar bujes de insertos Icone 1000 y IA 800 s/planos de pieza.",
+    "detalle": "Insertos y bujes serán dejados en el sector con las OT listos para procesar, después enviar a Granallado.",
+    "prioridad": "Urgente",
+    "estado": "Pendiente",
+    "creado": 1789389293919,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
