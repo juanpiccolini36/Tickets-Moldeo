@@ -533,5 +533,22 @@
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mu1877wj4lc66",
+    "sector": "M-29",
+    "tarea": "Retirar matriz de PP22520  y guardar la matriz en el Palet nº2.",
+    "detalle": "",
+    "prioridad": "Media",
+    "estado": "Pendiente",
+    "creado": 1789389320131,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
