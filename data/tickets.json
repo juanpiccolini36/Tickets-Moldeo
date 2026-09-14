@@ -567,5 +567,22 @@
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
+  },
+  {
+    "id": "tk_mu1a395zd97nm",
+    "sector": "M-110",
+    "tarea": "Colocar matriz de PP22472 - Pallet nº157.",
+    "detalle": "",
+    "prioridad": "Alta",
+    "estado": "Pendiente",
+    "creado": 1789392494375,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
