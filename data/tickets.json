@@ -506,14 +506,14 @@
     "tarea": "Colocar matriz de Curbing de Casposo para continuar con el PP pendiente.",
     "detalle": "",
     "prioridad": "Urgente",
-    "estado": "Pendiente",
+    "estado": "Terminada",
     "creado": 1789142393325,
     "iniciadoEn": 1789133400000,
-    "terminadoEn": 1789147800000,
+    "terminadoEn": 1789388941276,
     "pausadoEn": null,
     "creadoPor": "Juan Piccolini",
     "iniciadoPor": null,
-    "terminadoPor": null,
+    "terminadoPor": "Diego Pintos",
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
   }
