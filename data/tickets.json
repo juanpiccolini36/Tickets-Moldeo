@@ -591,15 +591,23 @@
     "tarea": "Fabricar matriz para PP22682 - Plancha EPDM 78SHA s/croquis adjunto en la OT:",
     "detalle": "",
     "prioridad": "Urgente",
-    "estado": "En curso",
+    "estado": "Pausada",
     "creado": 1789472537581,
     "iniciadoEn": 1789466400000,
     "terminadoEn": null,
-    "pausadoEn": null,
+    "pausadoEn": 1789482000000,
     "creadoPor": "Juan Piccolini",
     "iniciadoPor": "Juan Piccolini",
     "terminadoPor": null,
     "asignadoA": "u_msyt2us4",
-    "asignadoANombre": "Diego Pintos"
+    "asignadoANombre": "Diego Pintos",
+    "historialPausas": [
+      {
+        "pausadoEn": 1789482000000,
+        "motivo": "Esperando perno mecanizado de parte de Javier H.",
+        "pausadoPor": "Juan Piccolini",
+        "reanudadoEn": null
+      }
+    ]
   }
 ]
