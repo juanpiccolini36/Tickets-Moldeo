@@ -633,14 +633,14 @@
     "tarea": "Fabricar accesorios solicitados por Miguel para armar la defensa Icone 1000. Arandelas separadoras de tapa y tope inferior.",
     "detalle": "",
     "prioridad": "Media",
-    "estado": "Pendiente",
+    "estado": "Terminada",
     "creado": 1789642217088,
-    "iniciadoEn": null,
-    "terminadoEn": null,
+    "iniciadoEn": 1789560000000,
+    "terminadoEn": 1789642237719,
     "pausadoEn": null,
     "creadoPor": "Juan Piccolini",
     "iniciadoPor": null,
-    "terminadoPor": null,
+    "terminadoPor": "Diego Pintos",
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
   }
