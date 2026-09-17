@@ -609,5 +609,22 @@
         "reanudadoEn": null
       }
     ]
+  },
+  {
+    "id": "tk_mu5epp7tca9ta",
+    "sector": "I-01",
+    "tarea": "Soldar bujes en inserto superior de Icone 500 - Cantidad: 3 insertos.",
+    "detalle": "",
+    "prioridad": "Urgente",
+    "estado": "Pendiente",
+    "creado": 1789642124777,
+    "iniciadoEn": null,
+    "terminadoEn": null,
+    "pausadoEn": null,
+    "creadoPor": "Juan Piccolini",
+    "iniciadoPor": null,
+    "terminadoPor": null,
+    "asignadoA": "u_msyt2us4",
+    "asignadoANombre": "Diego Pintos"
   }
 ]
