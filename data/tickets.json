@@ -650,14 +650,14 @@
     "tarea": "Sacar matriz de PP22473 - Panel 305x305x60 Panamá.",
     "detalle": "Guardar en el Pallet nº157 y dejarlo en el espacio A2 de la estantería.",
     "prioridad": "Media",
-    "estado": "Pendiente",
+    "estado": "Terminada",
     "creado": 1789642343526,
-    "iniciadoEn": null,
-    "terminadoEn": null,
+    "iniciadoEn": 1789565400000,
+    "terminadoEn": 1789642363550,
     "pausadoEn": null,
     "creadoPor": "Juan Piccolini",
     "iniciadoPor": null,
-    "terminadoPor": null,
+    "terminadoPor": "Diego Pintos",
     "asignadoA": "u_msyt2us4",
     "asignadoANombre": "Diego Pintos"
   }
